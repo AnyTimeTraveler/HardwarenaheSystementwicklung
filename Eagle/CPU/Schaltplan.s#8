@@ -1826,8 +1826,8 @@
 <part name="U$19" library="89S52mini" deviceset="GND" device=""/>
 <part name="D1" library="89S52mini" deviceset="LED3-2,5" device=""/>
 <part name="D2" library="89S52mini" deviceset="LED3-2,5" device=""/>
-<part name="R3" library="89S52mini" deviceset="R-10" device=""/>
-<part name="R4" library="89S52mini" deviceset="R-10" device=""/>
+<part name="R3" library="89S52mini" deviceset="R-10" device="" value="1k8"/>
+<part name="R4" library="89S52mini" deviceset="R-10" device="" value="1k8"/>
 <part name="U$21" library="89S52mini" deviceset="+5V" device=""/>
 </parts>
 <sheets>
@@ -3061,6 +3061,8 @@
 <approved hash="113,1,33.3251,68.58,X1,,,,,"/>
 <approved hash="113,1,2.7429,55.88,S1,,,,,"/>
 <approved hash="113,1,-60.3673,5.00803,X4,,,,,"/>
+<approved hash="113,1,45.72,27.868,D1,,,,,"/>
+<approved hash="113,1,45.72,38.028,D2,,,,,"/>
 </errors>
 </schematic>
 </drawing>

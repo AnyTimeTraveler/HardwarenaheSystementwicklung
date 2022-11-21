@@ -2897,24 +2897,6 @@
 <pinref part="IC1" gate="G$1" pin="IOQ1"/>
 </segment>
 </net>
-<net name="!RD" class="0">
-<segment>
-<pinref part="IC2" gate="G$1" pin="P3.7"/>
-<wire x1="66.04" y1="20.32" x2="33.02" y2="20.32" width="0.1524" layer="91"/>
-<wire x1="33.02" y1="20.32" x2="33.02" y2="-22.86" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="I5"/>
-<wire x1="33.02" y1="-22.86" x2="160.02" y2="-22.86" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="!WR" class="0">
-<segment>
-<pinref part="IC2" gate="G$1" pin="P3.6"/>
-<wire x1="66.04" y1="22.86" x2="30.48" y2="22.86" width="0.1524" layer="91"/>
-<wire x1="30.48" y1="22.86" x2="30.48" y2="-25.4" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="I6"/>
-<wire x1="30.48" y1="-25.4" x2="160.02" y2="-25.4" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="PAD0" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="P1.0"/>
@@ -3077,21 +3059,53 @@
 <wire x1="40.64" y1="35.56" x2="43.18" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="!WR" class="0">
+<segment>
+<pinref part="IC2" gate="G$1" pin="P3.6"/>
+<wire x1="66.04" y1="22.86" x2="63.5" y2="22.86" width="0.1524" layer="91"/>
+<label x="60.96" y="22.86" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="I5"/>
+<wire x1="160.02" y1="-22.86" x2="157.48" y2="-22.86" width="0.1524" layer="91"/>
+<label x="152.4" y="-22.86" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="!RD" class="0">
+<segment>
+<pinref part="IC2" gate="G$1" pin="P3.7"/>
+<wire x1="66.04" y1="20.32" x2="63.5" y2="20.32" width="0.1524" layer="91"/>
+<label x="60.96" y="20.32" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="I6"/>
+<wire x1="160.02" y1="-25.4" x2="157.48" y2="-25.4" width="0.1524" layer="91"/>
+<label x="152.4" y="-25.4" size="1.778" layer="95"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
 <errors>
+<approved hash="101,1,33.02,-50.8,P1,MOUNT,,,,"/>
+<approved hash="101,1,45.72,-50.8,P2,MOUNT,,,,"/>
+<approved hash="101,1,33.02,-63.5,P3,MOUNT,,,,"/>
+<approved hash="101,1,45.72,-63.5,P4,MOUNT,,,,"/>
 <approved hash="104,1,106.68,68.58,IC2,VCC,+5V,,,"/>
 <approved hash="104,1,170.18,38.1,IC3,VCC,+5V,,,"/>
 <approved hash="104,1,233.68,20.32,IC4,VCC,+5V,,,"/>
-<approved hash="202,1,160.02,-10.16,IC1,I0/CLK,,,,"/>
-<approved hash="202,1,160.02,-17.78,IC1,I3,,,,"/>
+<approved hash="202,1,160.02,-27.94,IC1,I7,,,,"/>
+<approved hash="202,1,160.02,-30.48,IC1,I8,,,,"/>
 <approved hash="104,1,187.96,-33.02,IC1,VCC,+5V,,,"/>
 <approved hash="113,1,33.3251,68.58,X1,,,,,"/>
 <approved hash="113,1,2.7429,55.88,S1,,,,,"/>
 <approved hash="113,1,-60.3673,5.00803,X4,,,,,"/>
 <approved hash="113,1,45.72,27.868,D1,,,,,"/>
 <approved hash="113,1,45.72,38.028,D2,,,,,"/>
+<approved hash="113,1,31.7692,-49.2952,P1,,,,,"/>
+<approved hash="113,1,44.4692,-49.2952,P2,,,,,"/>
+<approved hash="113,1,31.7692,-61.9952,P3,,,,,"/>
+<approved hash="113,1,44.4692,-61.9952,P4,,,,,"/>
 </errors>
 </schematic>
 </drawing>
