@@ -1,0 +1,163 @@
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     1
+
+
+MACRO ASSEMBLER A51 V7.10
+OBJECT MODULE PLACED IN display_test.OBJ
+ASSEMBLER INVOKED BY: D:\Programme\Keil\C51\BIN\A51.EXE display_test.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     NAME display_test
+                       2     
+                       3     
+                       4     ;=====================
+                       5     ;= GLOBALE VARIABLEN =
+                       6     ;=====================
+                       7     
+  0000                 8     counter DATA 0x0000
+                       9     
+  2000                10     MAX_RAM_ADDR EQU 8192
+                      11     
+                      12     
+                      13     
+                      14     ;================
+                      15     ;= RESET VEKTOR =
+                      16     ;================
+                      17     
+                      18     ; Programmstart hier
+----                  19     CSEG AT 0x0000
+                      20     ; Aus dem Interrupt-Vektor raus springen
+                      21     ; Der Vektor sollte bis 0x33 gehen
+                      22     ; Sicherere ist es, ein Wenig hoeher zu springen.
+0000 2100             23     JMP 0x0100
+                      24     
+----                  25     CSEG AT 0x0100
+                      26     
+                      27     ;===============
+                      28     ;= STACK SETUP =
+                      29     ;===============
+                      30     
+                      31     ; move stack to the indirect addressed area, so the other register banks are free
+                      32     ; normally, the stack starts at 0x07, which is the start of the second register bank
+0100 7581FF           33     MOV SP, #0xFF
+                      34     
+                      35     
+                      36     ;===============
+                      37     ;= TIMER SETUP =
+                      38     ;===============
+                      39     
+                      40     ; Timer 1 $ Timer 0
+                      41     ; MODE BITS
+                      42     ; GATE | Counter/Timer | Mode 1 | Mode 0
+                      43     ; 
+                      44     ; Mode 00: 13 Bit Timer, 5 Bit Prescaler
+                      45     ; Mode 01: 16 Bit Timer, 0 Bit Prescaler
+                      46     ; Mode 11: 2x 8 Bit Timer (separat)
+                      47     ; 
+0103 758911           48     mov TMOD, #0001$0001b
+                      49     
+                      50     ; Interrupts allgemein aktivieren
+0106 D2AF             51     SETB EA
+                      52     
+                      53     ; Timer 0 Interrupt aktivieren
+0108 D2A9             54     SETB ET0
+                      55     
+                      56     ; Timer 0 Run aktivieren
+010A D28C             57     SETB TR0
+                      58     
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     2
+
+                      59     
+                      60     ;=============
+                      61     ;= MAIN LOOP =
+                      62     ;=============
+                      63     
+010C 900000           64     mov DPTR, #0x0000
+                      65     
+010F                  66     loop: 
+010F E582             67     mov A, DPL
+0111 F500             68     mov counter, A
+                      69     
+0113 F0               70     MOVX @DPTR, A
+0114 E0               71     MOVX A, @DPTR
+0115 B50008           72     CJNE A, counter, error
+0118 A3               73     INC DPTR
+                      74     
+0119 E583             75     mov A, DPH
+011B B420F1           76     CJNE A, #32, loop
+                      77     
+                      78     ; done!
+011E 80FE             79     jmp $
+                      80     
+0120                  81     error:
+                      82     
+                      83     ; infinite loop
+0120 80FE             84     JMP $
+                      85     
+                      86     
+                      87     
+                      88     ;===============
+                      89     ;= TIMER 0 ISR =
+                      90     ;===============
+                      91     
+                      92     ; Code Segment an Stelle des Timer 0 Interrupts
+----                  93     CSEG AT 0x000B
+                      94     ; Wechsel auf die 2. Registerbank
+000B D2D3             95     SETB RS0
+                      96     ; Keine Instruktion. Der Assembler muss auch wissen,
+                      97     ; dass ab hier die 2. Registerbank verwendet wird.
+                      98     USING 2
+                      99     
+                     100     ; R0 ist unser Zaehler
+                     101     ; Wir erhalten 25,43 Interrupts pro Sekunde
+                     102     ; Da wir die LED nur alle halbe Sekunde blinken lassen,
+                     103     ; muessen wir also Interrupts zaehlen
+000D 08              104     INC R0
+                     105     
+                     106     
+                     107     ; Wenn R0 auf 0 um
+000E B80D09          108     CJNE R0, #13, skip
+0011 30B504          109     jnb P3.5, setled
+0014 C2B5            110     clr P3.5
+0016 8002            111     jmp skip
+0018                 112     setled:
+0018 D2B5            113     setb P3.5
+001A                 114     skip:
+                     115     
+                     116     ; Wechsel zurueck auf die 1. Registerbank
+001A C2D3            117     CLR RS0
+                     118     USING 1
+001C 32              119     RETI
+                     120     
+                     121     
+                     122     END
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+COUNTER. . . . . .  D ADDR   0000H   A   
+DISPLAY_TEST . . .  N NUMB   -----       
+DPH. . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . .  D ADDR   0082H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ERROR. . . . . . .  C ADDR   0120H   A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+LOOP . . . . . . .  C ADDR   010FH   A   
+MAX_RAM_ADDR . . .  N NUMB   2000H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+RS0. . . . . . . .  B ADDR   00D0H.3 A   
+SETLED . . . . . .  C ADDR   0018H   A   
+SKIP . . . . . . .  C ADDR   001AH   A   
+SP . . . . . . . .  D ADDR   0081H   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 1 2 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

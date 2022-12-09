@@ -1,0 +1,116 @@
+A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     1
+
+
+MACRO ASSEMBLER A51 V7.10
+OBJECT MODULE PLACED IN blinky.OBJ
+ASSEMBLER INVOKED BY: D:\Programme\Keil\C51\BIN\A51.EXE blinky.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     NAME blinky
+                       2     
+                       3     
+                       4     ;================
+                       5     ;= RESET VEKTOR =
+                       6     ;================
+                       7     
+                       8     ; Programmstart hier
+----                   9     CSEG AT 0x0000
+                      10     ; Aus dem Interrupt-Vektor raus springen
+                      11     ; Der Vektor sollte bis 0x33 gehen
+                      12     ; Sicherere ist es, ein Wenig hoeher zu springen.
+0000 2100             13     JMP 0x0100
+                      14     
+                      15     
+                      16     ;=============
+                      17     ;= MAIN LOOP =
+                      18     ;=============
+                      19     
+                      20     ; Eigentlicher Programmcode
+----                  21     CSEG AT 0x0100
+                      22     
+                      23     ; Timer 1 $ Timer 0
+                      24     ; MODE BITS
+                      25     ; GATE | Counter/Timer | Mode 1 | Mode 0
+                      26     ; 
+                      27     ; Mode 00: 13 Bit Timer, 5 Bit Prescaler
+                      28     ; Mode 01: 16 Bit Timer, 0 Bit Prescaler
+                      29     ; Mode 11: 2x 8 Bit Timer (separat)
+                      30     ; 
+0100 758911           31     mov TMOD, #0001$0001b
+                      32     
+                      33     ; Interrupts allgemein aktivieren
+0103 D2AF             34     SETB EA
+                      35     
+                      36     ; Timer 0 Interrupt aktivieren
+0105 D2A9             37     SETB ET0
+                      38     
+                      39     ; Timer 0 Run aktivieren
+0107 D28C             40     SETB TR0
+                      41     
+                      42     ; Timer Setup durch!
+                      43     ; infinite loop
+0109 80FE             44     JMP $
+                      45     
+                      46     
+                      47     ;===============
+                      48     ;= TIMER 0 ISR =
+                      49     ;===============
+                      50     
+                      51     ; Code Segment an Stelle des Timer 0 Interrupts
+----                  52     CSEG AT 0x000B
+                      53     
+                      54     ; R0 ist unser Zaehler
+                      55     ; Wir erhalten 25,43 Interrupts pro Sekunde
+                      56     ; Da wir die LED nur alle halbe Sekunde blinken lassen,
+                      57     ; muessen wir also Interrupts zaehlen
+000B 08               58     INC R0
+A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     2
+
+                      59     
+                      60     
+                      61     ; Wenn R0 auf 0 umspringt, togglen wir die LED
+                      62     ; Ansonsten wird ueberprungen
+000C B80D09           63     CJNE R0, #13, skip
+                      64     ; Check, ob P3.5 Bit gesetzt ist
+000F 30B504           65     jnb P3.5, setled
+                      66     ; Clear P3.5
+0012 C2B5             67     clr P3.5
+                      68     ; Fertig
+0014 8002             69     jmp skip
+                      70     
+                      71     ; Das Bit war nicht gesetzt
+0016                  72     setled:
+                      73     ; Bit P3.5 setzen
+0016 D2B5             74     setb P3.5
+                      75     
+                      76     ; Das Skip-Label zum UEberspringen
+0018                  77     skip:
+                      78     
+                      79     ; Aus dem Interrupt returnen
+0018 32               80     RETI
+                      81     
+                      82     ; Ende des Assembler Programms
+                      83     END
+A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+BLINKY . . . . . .  N NUMB   -----       
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+SETLED . . . . . .  C ADDR   0016H   A   
+SKIP . . . . . . .  C ADDR   0018H   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

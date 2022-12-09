@@ -1,0 +1,167 @@
+BL51 BANKED LINKER/LOCATER V5.12                                                        11/30/2022  16:30:30  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V5.12, INVOKED BY:
+D:\PROGRAMME\KEIL\C51\BIN\BL51.EXE display_test.obj, blinky.obj, ram_test.obj TO Blinky RAMSIZE (256) XDATA (0X0000-0X41
+>> 7F)
+
+
+INPUT MODULES INCLUDED:
+  display_test.obj (DISPLAY_TEST)
+  blinky.obj (BLINKY)
+  ram_test.obj (RAM_TEST)
+
+
+LINK MAP OF MODULE:  Blinky (DISPLAY_TEST)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            REG     0008H     0008H     ABSOLUTE     "REG BANK 1"
+            REG     0010H     0008H     ABSOLUTE     "REG BANK 2"
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0002H     ABSOLUTE     
+* OVERLAP * CODE    0000H     0002H     ABSOLUTE     
+* OVERLAP * CODE    0000H     0002H     ABSOLUTE     
+                    0002H     0009H                  *** GAP ***
+            CODE    000BH     0012H     ABSOLUTE     
+* OVERLAP * CODE    000BH     000EH     ABSOLUTE     
+                    001DH     00E3H                  *** GAP ***
+            CODE    0100H     0022H     ABSOLUTE     
+* OVERLAP * CODE    0100H     000BH     ABSOLUTE     
+* OVERLAP * CODE    0100H     001CH     ABSOLUTE     
+
+
+
+SYMBOL TABLE OF MODULE:  Blinky (DISPLAY_TEST)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        DISPLAY_TEST
+  D:0000H         SYMBOL        COUNTER
+  N:0000H         SYMBOL        DISPLAY_TEST
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  B:00A8H.7       SYMBOL        EA
+  C:0120H         SYMBOL        ERROR
+  B:00A8H.1       SYMBOL        ET0
+  C:010FH         SYMBOL        LOOP
+  N:2000H         SYMBOL        MAX_RAM_ADDR
+  D:00B0H         SYMBOL        P3
+  B:00D0H.3       SYMBOL        RS0
+  C:0018H         SYMBOL        SETLED
+  C:001AH         SYMBOL        SKIP
+  D:0081H         SYMBOL        SP
+  D:0089H         SYMBOL        TMOD
+  B:0088H.4       SYMBOL        TR0
+BL51 BANKED LINKER/LOCATER V5.12                                                      11/30/2022  16:30:30  PAGE 2
+
+
+  C:0000H         LINE#         23
+  C:0100H         LINE#         33
+  C:0103H         LINE#         48
+  C:0106H         LINE#         51
+  C:0108H         LINE#         54
+  C:010AH         LINE#         57
+  C:010CH         LINE#         64
+  C:010FH         LINE#         67
+  C:0111H         LINE#         68
+  C:0113H         LINE#         70
+  C:0114H         LINE#         71
+  C:0115H         LINE#         72
+  C:0118H         LINE#         73
+  C:0119H         LINE#         75
+  C:011BH         LINE#         76
+  C:011EH         LINE#         79
+  C:0120H         LINE#         84
+  C:000BH         LINE#         95
+  C:000DH         LINE#         104
+  C:000EH         LINE#         108
+  C:0011H         LINE#         109
+  C:0014H         LINE#         110
+  C:0016H         LINE#         111
+  C:0018H         LINE#         113
+  C:001AH         LINE#         117
+  C:001CH         LINE#         119
+  -------         ENDMOD        DISPLAY_TEST
+
+  -------         MODULE        BLINKY
+  N:0000H         SYMBOL        BLINKY
+  B:00A8H.7       SYMBOL        EA
+  B:00A8H.1       SYMBOL        ET0
+  D:00B0H         SYMBOL        P3
+  C:0016H         SYMBOL        SETLED
+  C:0018H         SYMBOL        SKIP
+  D:0089H         SYMBOL        TMOD
+  B:0088H.4       SYMBOL        TR0
+  C:0000H         LINE#         13
+  C:0100H         LINE#         31
+  C:0103H         LINE#         34
+  C:0105H         LINE#         37
+  C:0107H         LINE#         40
+  C:0109H         LINE#         44
+  C:000BH         LINE#         58
+  C:000CH         LINE#         63
+  C:000FH         LINE#         65
+  C:0012H         LINE#         67
+  C:0014H         LINE#         69
+  C:0016H         LINE#         74
+  C:0018H         LINE#         80
+  -------         ENDMOD        BLINKY
+
+  -------         MODULE        RAM_TEST
+  D:0000H         SYMBOL        COMPARE_VALUE
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  C:0118H         SYMBOL        ERROR
+BL51 BANKED LINKER/LOCATER V5.12                                                      11/30/2022  16:30:30  PAGE 3
+
+
+  C:0105H         SYMBOL        LOOP
+  N:2000H         SYMBOL        MAX_RAM_ADDR
+  D:00B0H         SYMBOL        P3
+  N:0000H         SYMBOL        RAM_TEST
+  C:0000H         LINE#         28
+  C:0100H         LINE#         38
+  C:0102H         LINE#         42
+  C:0105H         LINE#         51
+  C:0107H         LINE#         54
+  C:0109H         LINE#         57
+  C:010AH         LINE#         59
+  C:010BH         LINE#         64
+  C:010EH         LINE#         66
+  C:010FH         LINE#         69
+  C:0111H         LINE#         75
+  C:0114H         LINE#         80
+  C:0116H         LINE#         81
+  C:0118H         LINE#         87
+  C:011AH         LINE#         88
+  -------         ENDMOD        RAM_TEST
+
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    0000H
+    TO:      0001H
+
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    0000H
+    TO:      0001H
+
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    000BH
+    TO:      001CH
+
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    0100H
+    TO:      0121H
+
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    0100H
+    TO:      0121H
+
+Program Size: data=24.0 xdata=0 code=111
+LINK/LOCATE RUN COMPLETE.  5 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,6 @@
+"display_test.obj",
+"blinky.obj",
+"ram_test.obj" 
+TO "Blinky" 
+RAMSIZE(256) 
+XDATA( 0X0000-0X417F )

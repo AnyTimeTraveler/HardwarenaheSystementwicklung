@@ -1,0 +1,124 @@
+A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     1
+
+
+MACRO ASSEMBLER A51 V7.10
+OBJECT MODULE PLACED IN ram_test.OBJ
+ASSEMBLER INVOKED BY: D:\Programme\Keil\C51\BIN\A51.EXE ram_test.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     NAME ram_test
+                       2     
+                       3     
+                       4     ;=====================
+                       5     ;= GLOBALE VARIABLEN =
+                       6     ;=====================
+                       7     
+  0000                 8     compare_value DATA 0x0000
+                       9     
+                      10     
+                      11     ;======================
+                      12     ;= GLOBALE KONSTANTEN =
+                      13     ;======================
+                      14     
+                      15     ; Diese werden nicht mitkompiliert
+  2000                16     MAX_RAM_ADDR EQU 8192
+                      17     
+                      18     
+                      19     ;================
+                      20     ;= RESET VEKTOR =
+                      21     ;================
+                      22     
+                      23     ; Programmstart hier
+----                  24     CSEG AT 0x0000
+                      25     ; Aus dem Interrupt-Vektor raus springen
+                      26     ; Der Vektor sollte bis 0x33 gehen
+                      27     ; Sicherere ist es, ein Wenig hoeher zu springen.
+0000 2100             28     JMP 0x0100
+                      29     
+                      30     ;=============
+                      31     ;= MAIN LOOP =
+                      32     ;=============
+                      33     
+                      34     ; Eigentlicher Programmcode
+----                  35     CSEG AT 0x0100
+                      36     
+                      37     ; LED aus machen
+0100 D2B5             38     setb P3.5
+                      39     
+                      40     ; DPTR ist 16 Bit und wird hochgezaehlt,
+                      41     ; um den RAM zu addressieren
+0102 900000           42     mov DPTR, #0x0000
+                      43     
+                      44     ; In einer Schleife gehen wir jetzt alle Addressen durch,
+                      45     ; beschreiben sie und lesen sie wieder.
+                      46     ; Dann wird der Wert verglichen und geprueft,
+                      47     ; dass der Wert passt.
+0105                  48     loop: 
+                      49     ; Die niedrigen 8 Bit von DPTR wird als testwert genommen
+                      50     ; Wir legen sie in A, um sie an den RAM zu schicken
+0105 E582             51     mov A, DPL
+                      52     ; Vorher wird sie noch in die Variable compare_value kopiert,
+                      53     ; zum spaeteren Vergleich
+0107 F500             54     mov compare_value, A
+                      55     
+                      56     ; Schreibe A in den RAM
+0109 F0               57     MOVX @DPTR, A
+                      58     ; Lese A aus dem RAM
+A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     2
+
+010A E0               59     MOVX A, @DPTR
+                      60     
+                      61     ; Compare Jump Not Equal
+                      62     ; Vergleiche und springe zu error,
+                      63     ; wenn der Wert nicht der gleiche ist
+010B B5000A           64     CJNE A, compare_value, error
+                      65     ; Zieladdresse um 1 erhoehen
+010E A3               66     INC DPTR
+                      67     
+                      68     ; Accumulator mit den 8 hohen Bits der Adresse fuellen
+010F E583             69     mov A, DPH
+                      70     
+                      71     ; Compare Jump Not Equal
+                      72     ; Sobald die hohen Bits 32 sind,
+                      73     ; sind wir bei 8192 im RAM, und somit am Ende des RAM's
+                      74     ; Also springen wir, bis der Wert gleich ist
+0111 B420F1           75     CJNE A, #32, loop
+                      76     
+                      77     ; done!
+                      78     ; Endlosschleife
+                      79     ; LED an machen
+0114 C2B5             80     clr P3.5
+0116 80FE             81     jmp $
+                      82     
+0118                  83     error:
+                      84     
+                      85     ; infinite loop
+                      86     ; LED aus machen
+0118 D2B5             87     setb P3.5
+011A 80FE             88     JMP $
+                      89     
+                      90     END
+                             
+A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+COMPARE_VALUE. . .  D ADDR   0000H   A   
+DPH. . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . .  D ADDR   0082H   A   
+ERROR. . . . . . .  C ADDR   0118H   A   
+LOOP . . . . . . .  C ADDR   0105H   A   
+MAX_RAM_ADDR . . .  N NUMB   2000H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+RAM_TEST . . . . .  N NUMB   -----       
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
