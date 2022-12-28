@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     1
+A51 MACRO ASSEMBLER  BLINKY                                                               12/20/2022 18:27:41 PAGE     1
 
 
 MACRO ASSEMBLER A51 V7.10
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
                       56     ; Da wir die LED nur alle halbe Sekunde blinken lassen,
                       57     ; muessen wir also Interrupts zaehlen
 000B 08               58     INC R0
-A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     2
+A51 MACRO ASSEMBLER  BLINKY                                                               12/20/2022 18:27:41 PAGE     2
 
                       59     
                       60     
@@ -92,7 +92,7 @@ LOC  OBJ            LINE     SOURCE
                       81     
                       82     ; Ende des Assembler Programms
                       83     END
-A51 MACRO ASSEMBLER  BLINKY                                                               11/30/2022 16:30:30 PAGE     3
+A51 MACRO ASSEMBLER  BLINKY                                                               12/20/2022 18:27:41 PAGE     3
 
 SYMBOL TABLE LISTING
 ------ ----- -------

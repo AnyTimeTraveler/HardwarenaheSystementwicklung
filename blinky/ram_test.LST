@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     1
+A51 MACRO ASSEMBLER  RAM_TEST                                                             12/20/2022 18:27:41 PAGE     1
 
 
 MACRO ASSEMBLER A51 V7.10
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
                       56     ; Schreibe A in den RAM
 0109 F0               57     MOVX @DPTR, A
                       58     ; Lese A aus dem RAM
-A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     2
+A51 MACRO ASSEMBLER  RAM_TEST                                                             12/20/2022 18:27:41 PAGE     2
 
 010A E0               59     MOVX A, @DPTR
                       60     
@@ -100,7 +100,7 @@ LOC  OBJ            LINE     SOURCE
                       89     
                       90     END
                              
-A51 MACRO ASSEMBLER  RAM_TEST                                                             11/30/2022 16:30:30 PAGE     3
+A51 MACRO ASSEMBLER  RAM_TEST                                                             12/20/2022 18:27:41 PAGE     3
 
 SYMBOL TABLE LISTING
 ------ ----- -------

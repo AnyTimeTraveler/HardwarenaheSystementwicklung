@@ -1,0 +1,258 @@
+A51 MACRO ASSEMBLER  GAME                                                                 12/19/2022 20:57:18 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN game.OBJ
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE game.a51
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     NAME game
+                       2     
+                       3     ; =========
+                       4     ; == ROM ==
+                       5     ; =========
+                       6     
+  0000                 7     ISR_RESET                   EQU 0x0000
+  0003                 8     ISR_EXTERN_0                EQU 0x0003
+  000B                 9     ISR_TIMER_0                 EQU 0x000B
+  0013                10     ISR_EXTERN_1                EQU 0x0013
+  001B                11     ISR_TIMER_1                 EQU 0x001B
+  0023                12     ISR_SERIAL                  EQU 0x0023
+  002B                13     ISR_TIMER_2                 EQU 0x002B
+  0033                14     FUN_MAIN                    EQU 0x0033
+                      15     
+                      16     
+                      17     ; =============
+                      18     ; == INT RAM ==
+                      19     ; =============
+                      20     
+  0000                21     REGISTER_BANKS_BEGIN        EQU 0x00
+  0000                22     R0_ADDR                     EQU 0x00
+  0001                23     R1_ADDR                     EQU 0x01
+  0020                24     REGISTER_BANKS_END          EQU 0x20
+  0020                25     REGISTER_BANKS_LEN          EQU 0x20
+                      26     
+  0020                27     BIT_ADDRESSABLE_BEGIN       EQU 0x20
+                      28     
+  0001                29     BIT_DO_REFRESH              EQU 0x20.1
+                      30     
+  0030                31     BIT_ADDRESSABLE_END         EQU 0x30
+  0010                32     BIT_ADDRESSABLE_LEN         EQU 0x10
+                      33     
+  0030                34     SCRATCHPAD_BEGIN            EQU 0x30
+  0080                35     SCRATCHPAD_END              EQU 0x80
+  0050                36     SCRATCHPAD_LEN              EQU 0x50
+                      37     
+  0080                38     MAP_BEGIN                   EQU 0x80
+  00C0                39     MAP_END                     EQU 0xC0
+  0040                40     MAP_LEN                     EQU 0x40
+                      41     
+  00C0                42     STACK_BEGIN                 EQU 0xC0
+  00FF                43     STACK_END                   EQU 0xFF
+  0040                44     STACK_LEN                   EQU 0x40
+                      45     
+                      46     
+                      47     ; =============
+                      48     ; == EXT RAM ==
+                      49     ; =============
+                      50     
+  0000                51     RAM_START                   EQU 0x0000
+  0000                52     RAW_DISPLAY_BUFFER_START    EQU 0x0000
+  0000                53     RAW_DISPLAY_BUFFER_LINE_0   EQU 0x0000
+  0100                54     RAW_DISPLAY_BUFFER_LINE_1   EQU 0x0100
+  0200                55     RAW_DISPLAY_BUFFER_LINE_2   EQU 0x0200
+  0300                56     RAW_DISPLAY_BUFFER_LINE_3   EQU 0x0300
+  0400                57     RAW_DISPLAY_BUFFER_LINE_4   EQU 0x0400
+  0500                58     RAW_DISPLAY_BUFFER_LINE_5   EQU 0x0500
+A51 MACRO ASSEMBLER  GAME                                                                 12/19/2022 20:57:18 PAGE     2
+
+  0600                59     RAW_DISPLAY_BUFFER_LINE_6   EQU 0x0600
+  0700                60     RAW_DISPLAY_BUFFER_LINE_7   EQU 0x0700
+  0800                61     RAW_DISPLAY_BUFFER_END      EQU 0x0800
+  0800                62     GAME_SCREEN_START           EQU 0x0800
+  1000                63     GAME_SCREEN_END             EQU 0x1000
+  2000                64     RAM_END                     EQU 0x2000
+                      65     
+                      66     
+  2000                67     LED_MATRIX_START            EQU 0x2000
+  2100                68     LED_MATRIX_END              EQU 0x2100
+  0009                69     LED_MATRIX_ROW_LEN          EQU 0x9
+  0048                70     LED_MATRIX_LEN              EQU 0x48
+  0100                71     LED_MATRIX_ADDR_SPACE_LEN   EQU 0x100
+                      72     
+                      73     
+                      74     ; ==========
+                      75     ; == CODE ==
+                      76     ; ==========
+                      77     
+----                  78     CSEG AT ISR_RESET
+0000 8031             79         JMP FUN_MAIN
+                      80     
+                      81     ;$include (screen_refresh.a51)
+----            +1    82     CSEG AT ISR_TIMER_0
+000B C28C       +1    83         CLR TR0
+000D 758A54     +1    84         MOV TL0, #0x54
+0010 758CF2     +1    85         MOV TH0, #0xF2
+0013 D28C       +1    86         SETB TR0
+0015 D201       +1    87         SETB BIT_DO_REFRESH
+0017 32         +1    88         RETI
+                +1    89     
+                +1    90     
+0018            +1    91     FUN_SETUP_TIMER_0:
+                +1    92         ; Timer 1 $ Timer 0
+                +1    93         ; MODE BITS
+                +1    94         ; GATE | Counter/Timer | Mode 1 | Mode 0
+                +1    95         ; 
+                +1    96         ; Mode 00: 13 Bit Timer, 5 Bit Prescaler
+                +1    97         ; Mode 01: 16 Bit Timer, 0 Bit Prescaler
+                +1    98         ; Mode 11: 2x 8 Bit Timer (separat)
+                +1    99         ; 
+0018 758911     +1   100         MOV TMOD, #0001$0001b
+                +1   101         ; Interrupts allgemein aktivieren
+001B D2AF       +1   102         SETB EA
+                +1   103         ; Timer 0 Interrupt aktivieren
+001D D2A9       +1   104         SETB ET0
+                +1   105         ; Timer 0 Run aktivieren
+001F D28C       +1   106         SETB TR0
+                +1   107         
+0021 22         +1   108         RET
+                +1   109     
+                +1   110     
+0022            +1   111     JMP_REFRESH_SCREEN:
+0022 C2B5       +1   112         CLR P3.5
+0024 902000     +1   113         MOV DPTR, #LED_MATRIX_START
+0027 E9         +1   114         MOV A, R1
+0028 4408       +1   115         ORL A, #0x08
+002A F8         +1   116         MOV R0, A
+002B 1135       +1   117         CALL FUN_REFRESH_SCREEN
+002D 09         +1   118         INC R1
+002E B90808     +1   119         CJNE R1, #8, LOOP_MAIN
+0031 7900       +1   120         MOV R1, #0
+0033 8004       +1   121         JMP LOOP_MAIN
+                +1   122     
+                +1   123     
+                +1   124     ; PARAM R0: Line configuration bits
+A51 MACRO ASSEMBLER  GAME                                                                 12/19/2022 20:57:18 PAGE     3
+
+                +1   125     ; PARAM DPTR: LED Matrix to refresh
+0035            +1   126     FUN_REFRESH_SCREEN:
+                +1   127         REPT 8
+                +1   128             MOV A, #0xF0 
+                +1   129             REPT 8
+                +1   130                 MOVX @DPTR, A
+                +1   131                 INC DPTR
+                +1   132             ENDM
+                +1   133             ; Write enable line
+                +1   134             MOV A, R0
+                +1   135             MOVX @DPTR, A
+                +1   136             INC DPTR
+                +1   137         ENDM
+00DD 22         +1   338         RET
+                     339     
+                     340     
+                     341     ; Main
+----                 342     CSEG AT FUN_MAIN
+0033 1118            343         CALL FUN_SETUP_TIMER_0
+0035 1140            344         CALL FUN_CLEAR_SCREEN_MEMORY
+0037 7900            345         MOV R1, #0
+0039                 346     LOOP_MAIN:
+0039 D2B5            347         SETB P3.5
+003B 1001E4          348         JBC BIT_DO_REFRESH, JMP_REFRESH_SCREEN
+003E 80F9            349         JMP LOOP_MAIN
+                     350     
+                     351     
+0040                 352     FUN_CLEAR_SCREEN_MEMORY:
+0040 902000          353         MOV DPTR, #LED_MATRIX_START
+0043 740F            354         MOV A, #0x0F
+                     355         REPT 8
+                     356         REPT 8
+                     357             MOVX @DPTR, A
+                     358             REPT 7
+                     359                 INC DPL
+                     360                 MOVX @DPTR, A
+                     361             ENDM
+                     362             ; Skip enable line
+                     363             INC DPTR
+                     364         ENDM
+                     365         ENDM
+0605 22             1782         RET
+                    1783     
+                    1784     ; =================
+                    1785     ; == SCREEN DATA ==
+                    1786     ; =================
+                    1787     
+                    1788     END
+A51 MACRO ASSEMBLER  GAME                                                                 12/19/2022 20:57:18 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E                    T Y P E  V A L U E   ATTRIBUTES
+
+BIT_ADDRESSABLE_BEGIN . .  N NUMB   0020H   A   
+BIT_ADDRESSABLE_END . . .  N NUMB   0030H   A   
+BIT_ADDRESSABLE_LEN . . .  N NUMB   0010H   A   
+BIT_DO_REFRESH. . . . . .  B ADDR   0020H.1 A   
+DPL . . . . . . . . . . .  D ADDR   0082H   A   
+EA. . . . . . . . . . . .  B ADDR   00A8H.7 A   
+ET0 . . . . . . . . . . .  B ADDR   00A8H.1 A   
+FUN_CLEAR_SCREEN_MEMORY .  C ADDR   0040H   A   
+FUN_MAIN. . . . . . . . .  N NUMB   0033H   A   
+FUN_REFRESH_SCREEN. . . .  C ADDR   0035H   A   
+FUN_SETUP_TIMER_0 . . . .  C ADDR   0018H   A   
+GAME. . . . . . . . . . .  N NUMB   -----       
+GAME_SCREEN_END . . . . .  N NUMB   1000H   A   
+GAME_SCREEN_START . . . .  N NUMB   0800H   A   
+ISR_EXTERN_0. . . . . . .  N NUMB   0003H   A   
+ISR_EXTERN_1. . . . . . .  N NUMB   0013H   A   
+ISR_RESET . . . . . . . .  N NUMB   0000H   A   
+ISR_SERIAL. . . . . . . .  N NUMB   0023H   A   
+ISR_TIMER_0 . . . . . . .  N NUMB   000BH   A   
+ISR_TIMER_1 . . . . . . .  N NUMB   001BH   A   
+ISR_TIMER_2 . . . . . . .  N NUMB   002BH   A   
+JMP_REFRESH_SCREEN. . . .  C ADDR   0022H   A   
+LED_MATRIX_ADDR_SPACE_LEN  N NUMB   0100H   A   
+LED_MATRIX_END. . . . . .  N NUMB   2100H   A   
+LED_MATRIX_LEN. . . . . .  N NUMB   0048H   A   
+LED_MATRIX_ROW_LEN. . . .  N NUMB   0009H   A   
+LED_MATRIX_START. . . . .  N NUMB   2000H   A   
+LOOP_MAIN . . . . . . . .  C ADDR   0039H   A   
+MAP_BEGIN . . . . . . . .  N NUMB   0080H   A   
+MAP_END . . . . . . . . .  N NUMB   00C0H   A   
+MAP_LEN . . . . . . . . .  N NUMB   0040H   A   
+P3. . . . . . . . . . . .  D ADDR   00B0H   A   
+R0_ADDR . . . . . . . . .  N NUMB   0000H   A   
+R1_ADDR . . . . . . . . .  N NUMB   0001H   A   
+RAM_END . . . . . . . . .  N NUMB   2000H   A   
+RAM_START . . . . . . . .  N NUMB   0000H   A   
+RAW_DISPLAY_BUFFER_END. .  N NUMB   0800H   A   
+RAW_DISPLAY_BUFFER_LINE_0  N NUMB   0000H   A   
+RAW_DISPLAY_BUFFER_LINE_1  N NUMB   0100H   A   
+RAW_DISPLAY_BUFFER_LINE_2  N NUMB   0200H   A   
+RAW_DISPLAY_BUFFER_LINE_3  N NUMB   0300H   A   
+RAW_DISPLAY_BUFFER_LINE_4  N NUMB   0400H   A   
+RAW_DISPLAY_BUFFER_LINE_5  N NUMB   0500H   A   
+RAW_DISPLAY_BUFFER_LINE_6  N NUMB   0600H   A   
+RAW_DISPLAY_BUFFER_LINE_7  N NUMB   0700H   A   
+RAW_DISPLAY_BUFFER_START.  N NUMB   0000H   A   
+REGISTER_BANKS_BEGIN. . .  N NUMB   0000H   A   
+REGISTER_BANKS_END. . . .  N NUMB   0020H   A   
+REGISTER_BANKS_LEN. . . .  N NUMB   0020H   A   
+SCRATCHPAD_BEGIN. . . . .  N NUMB   0030H   A   
+SCRATCHPAD_END. . . . . .  N NUMB   0080H   A   
+SCRATCHPAD_LEN. . . . . .  N NUMB   0050H   A   
+STACK_BEGIN . . . . . . .  N NUMB   00C0H   A   
+STACK_END . . . . . . . .  N NUMB   00FFH   A   
+STACK_LEN . . . . . . . .  N NUMB   0040H   A   
+TH0 . . . . . . . . . . .  D ADDR   008CH   A   
+TL0 . . . . . . . . . . .  D ADDR   008AH   A   
+TMOD. . . . . . . . . . .  D ADDR   0089H   A   
+TR0 . . . . . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

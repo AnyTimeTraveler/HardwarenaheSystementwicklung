@@ -1,26 +1,22 @@
 ### uVision2 Project, (C) Keil Software
 ### Do not modify !
 
-Target (Assembly Target), 0x0000 // Tools: 'MCS-51'
+Target (Target 1), 0x0000 // Tools: 'MCS-51'
 
-Group (Test)
-Group (Display Test)
-Group (Blinky)
-Group (RAM Test)
+Group (Source Group 1)
 
-File 2,2,<.\display_test.a51><display_test.a51> 0x0 
-File 3,2,<.\blinky.a51><blinky.a51> 0x0 
-File 4,2,<.\ram_test.a51><ram_test.a51> 0x0 
+File 1,2,<.\figures.a51><figures.a51> 0x0 
+File 1,2,<.\game.a51><game.a51> 0x0 
 
 
-Options 1,0,0  // Target 'Assembly Target'
- Device (AT89C52)
+Options 1,0,0  // Target 'Target 1'
+ Device (AT89S52)
  Vendor (Atmel)
- Cpu (IRAM(0-0xFF) IROM(0-0x1FFF) CLOCK(24000000))
+ Cpu (IRAM(0-0xFF) IROM(0-0x1FFF) CLOCK(33000000) MODAT2)
  FlashUt ()
  StupF ("LIB\STARTUP.A51" ("Standard 8051 Startup Code"))
  FlashDR ()
- Rgf (REGX52.H)
+ Rgf (REGX51.H)
  Mem ()
  C ()
  A ()
@@ -32,12 +28,12 @@ Options 1,0,0  // Target 'Assembly Target'
  EnvLib ()
  EnvReg (ÿAtmel\)
  OrgReg (ÿAtmel\)
- TgStat=8
+ TgStat=0
  OutDir (.\)
- OutName (Blinky)
+ OutName (game)
  GenApp=1
  GenLib=0
- GenHex=0
+ GenHex=1
  Debug=1
  Browse=1
  LstDir (.\)
@@ -60,7 +56,7 @@ Options 1,0,0  // Target 'Assembly Target'
  RCB51 { 0,0,0,0,0,255,255,0,0 }
  RXB51 { 0,0,0,0,0,0,0,0,0 }
  OCM51 { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
- OCR51 { 0,0,0,0,0,0,32,0,0,0,0,32,0,0,128,33,0,0,0,0,0,0,0,0,0,0,0 }
+ OCR51 { 0,0,0,0,0,0,32,0,0,0,0,32,0,0,0,1,0,0,0,0,96,0,0,0,1,0,0 }
  IRO51 { 1,0,0,0,0,0,32,0,0 }
  IRA51 { 0,0,0,0,0,0,1,0,0 }
  XRA51 { 0,0,0,0,0,0,0,0,0 }
@@ -98,7 +94,7 @@ Options 1,0,0  // Target 'Assembly Target'
  LX51CSC ()
  LX51UCS ()
  LX51COB ()
- LX51XDB (0X0000-0X1FFF,0X2000-0X417F)
+ LX51XDB (0X0000-0X1FFF,0X2000-0X20FF,0X6000-0X60FF)
  LX51PDB ()
  LX51BIB ()
  LX51DAB ()
@@ -110,7 +106,7 @@ Options 1,0,0  // Target 'Assembly Target'
  LX51BIS ()
  LX51DAS ()
  LX51IDS ()
-  OPTDL (S8051.DLL)()(DP51.DLL)(-p52)(S8051.DLL)()(TP51.DLL)(-p52)
+  OPTDL (S8051.DLL)()(DP51.DLL)(-pAT52)(S8051.DLL)()(TP51.DLL)(-pAT52)
   OPTDBG 44029,-1,()()()()()()()()()() (BIN\MON51.DLL)()()()
  FLASH1 { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
  FLASH2 ()

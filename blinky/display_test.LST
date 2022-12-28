@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     1
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         12/20/2022 18:27:41 PAGE     1
 
 
 MACRO ASSEMBLER A51 V7.10
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
                       56     ; Timer 0 Run aktivieren
 010A D28C             57     SETB TR0
                       58     
-A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     2
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         12/20/2022 18:27:41 PAGE     2
 
                       59     
                       60     ;=============
@@ -131,7 +131,7 @@ LOC  OBJ            LINE     SOURCE
                      120     
                      121     
                      122     END
-A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         11/30/2022 16:30:49 PAGE     3
+A51 MACRO ASSEMBLER  DISPLAY_TEST                                                         12/20/2022 18:27:41 PAGE     3
 
 SYMBOL TABLE LISTING
 ------ ----- -------
