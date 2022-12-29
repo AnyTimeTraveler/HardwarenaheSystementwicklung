@@ -1,4 +1,20 @@
 
+
+; ====================
+; == REGISTER BANKS ==
+; ====================
+
+; BANK 0
+;   Game
+;   Detect Baudrate
+; BANK 1
+;   (detect baudrate)
+; BANK 2
+;   Screen
+; BANK 3
+;   (unused)
+
+
 ; =========
 ; == ROM ==
 ; =========
@@ -11,7 +27,8 @@ ISR_TIMER_1                 EQU 0x001B
 ISR_SERIAL                  EQU 0x0023
 ISR_TIMER_2                 EQU 0x002B
 SEG_ISR_EXT_0               EQU 0x0033
-SEG_MAIN                    EQU 0x0040
+SEG_DETECT_BAUDRATE_ISR     EQU 0x003F
+SEG_MAIN                    EQU 0x0050
 SEG_DETECT_BAUDRATE         EQU 0x1600
 SEG_REFRESH_SCREEN          EQU 0x1700
 SEG_SETUP_TIMER_0           EQU 0x1800
@@ -89,6 +106,7 @@ REGISTER_BANKS_LEN          EQU 0x20
 ; BEGIN Bit Addressable
 ; 0x00
 BIT_ADDRESSABLE_BEGIN       EQU 0x20
+BIT_BAUDRATE_DETECTING      EQU 0x2F.6
 BIT_BAUD_ERROR_FLAG         EQU 0x2F.7
 BITS_GAMESCREEN             EQU 0x20
 BIT_ADDRESSABLE_END         EQU 0x30
@@ -98,12 +116,15 @@ BIT_ADDRESSABLE_LEN         EQU 0x10
 
 ; BEGIN Scratchpad
 SCRATCHPAD_BEGIN            EQU 0x30
-COLLISION_SECTION           EQU 0x37    ; maybe not needed
+GAMETICK_SUB_COUNTER        EQU 0x30
+CURRENT_LEVEL               EQU 0x31
+; space
 CURRENT_PIECE_INDEX         EQU 0x38
 CURRENT_PIECE_ROT_INDEX     EQU 0x39
 CURRENT_PIECE_V_POS         EQU 0x3A
 CURRENT_PIECE_H_POS         EQU 0x3B
 SCREEN_REFRESH_CURRENT_ROW  EQU 0x3C
+; space
 CURRENT_PIECE_DECOMPRESSED  EQU 0x58
 CP                          EQU CURRENT_PIECE_DECOMPRESSED
 SCRATCHPAD_END              EQU 0x60

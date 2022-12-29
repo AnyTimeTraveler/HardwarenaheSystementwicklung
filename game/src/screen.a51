@@ -2,6 +2,25 @@ NAME screen
 
 $INCLUDE(constants.a51)
 
+
+CSEG AT ISR_TIMER_0
+    ; Wechsel auf die Registerbank 2
+    SETB RS1
+    ; Keine Instruktion. Der Assembler muss auch wissen,
+    ; dass ab hier die Registerbank 2 verwendet wird.
+    USING 2
+    ; CLR TR0
+    MOV TH0, #0xF4
+    MOV TL0, #0x48
+    ; SETB TR0
+    CALL SEG_REFRESH_SCREEN
+    ; Wechsel auf die Registerbank 0
+    CLR RS1
+    ; Keine Instruktion. Der Assembler muss auch wissen,
+    ; dass ab hier die Registerbank 0 verwendet wird.
+    USING 0
+    RETI
+
 CSEG AT SEG_REFRESH_SCREEN
 FUN_REFRESH_SCREEN:
     MOV R7, SCREEN_REFRESH_CURRENT_ROW
@@ -21,7 +40,7 @@ FUN_REFRESH_SCREEN_ROW:
     ; since we only have do-while loops available
     ; the first loop iteration only shifts the bit form carry into the byte
     ; line is equivalent to MOV R1, R7
-    MOV 0x01, R7
+    MOV REGISTER_BANK_2_BEGIN + 1, R7
     INC R1
     ; by shifting through carry and setting carry to 1
     ; we can shift once and end up with what would have been zero shifts

@@ -9,13 +9,11 @@ $INCLUDE(constants.a51)
 CSEG AT ISR_RESET
     JMP SEG_MAIN
 
+CSEG AT ISR_TIMER_1
+    JB BIT_BAUDRATE_DETECTING, SEG_DETECT_BAUDRATE_ISR
+    JMP JMP_SUB_GAMETICK
 
-CSEG AT ISR_TIMER_0
-    CLR TR0
-    MOV TH0, #0xF4
-    MOV TL0, #0x48
-    SETB TR0
-    CALL SEG_REFRESH_SCREEN
+CSEG AT ISR_SERIAL
     RETI
 
 ; Main
@@ -162,4 +160,52 @@ FUN_CLEAR_FULL_ROWS:
 FUN_MOVE_ROWS_DOWN:
     RET
 
+LEVEL_TICKS:
+    DB 142
+    DB 112
+    DB 88
+    DB 67
+    DB 50
+    DB 37
+    DB 27
+    DB 19
+    DB 13
+    DB 9
+    DB 6
+    DB 4
+    DB 3
+    DB 2
+    DB 1
+
+JMP_SUB_GAMETICK:    
+    ; Reload with DF76
+    ; for 200 Interrupts per Second
+    ; Actually, reload with D20C
+    ; for one tick every 7 ms (one gametick on lv 15) and scale from there
+    ; CLR TR1
+    MOV TH1, #0xDF
+    MOV TL1, #0x76
+    ; SETB TR1
+
+    ; increment gametick subcounter
+    MOV A, GAMETICK_SUB_COUNTER
+    DEC A
+    MOV GAMETICK_SUB_COUNTER, A
+    ; check if sub counter has been reached
+    JNZ SUB_GAMETICK_RETURN
+    
+    ; load max ticks for current level
+    MOV DPTR, #LEVEL_TICKS
+    MOV A, CURRENT_LEVEL
+    MOVC A, @A+DPTR
+    MOV GAMETICK_SUB_COUNTER, A
+    
+    CALL FUN_GAMETICK
+
+SUB_GAMETICK_RETURN:
+    RETI
+
+FUN_GAMETICK:
+GAMETICK_RETURN:
+    RET
 END

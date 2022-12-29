@@ -23,7 +23,7 @@ TIMER_ALREADY_RUNNING:
 RETURN:
     RETI
 
-CSEG AT ISR_TIMER_1
+CSEG AT SEG_DETECT_BAUDRATE_ISR
     ; Overflow von Timer 1
     ; Bedeutet, dass das Messergebnis ungueltig ist
     ; Alles zuruecksetzen
@@ -34,6 +34,7 @@ CSEG AT ISR_TIMER_1
 
 
 CSEG AT SEG_DETECT_BAUDRATE
+    SETB BIT_BAUDRATE_DETECTING
     ; Interrupt INT0 scharf schalten
     ; Der Interrupt startet dann Timer 1
 
@@ -46,7 +47,9 @@ CSEG AT SEG_DETECT_BAUDRATE
     JB ET1, $
     JNB BIT_BAUD_ERROR_FLAG, SAMPLE_GATHERING_OK
     ; Retry
-    CALL SEG_DETECT_BAUDRATE
+    JMP SEG_DETECT_BAUDRATE
+
+    CLR BIT_BAUDRATE_DETECTING
     RET
 
 SAMPLE_GATHERING_OK:
