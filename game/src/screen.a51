@@ -1,9 +1,15 @@
 NAME screen
 
-$INCLUDE(constants.a51)
+SEG_REFRESH_SCREEN SEGMENT CODE
 
+EXTRN NUMBER (REGISTER_BANK_2_BEGIN)
+EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW)
+EXTRN IDATA (GAMESCREEN)
+EXTRN XDATA (LED_MATRIX_0)
+PUBLIC PJMPI_REFRESH_SCREEN
 
-CSEG AT ISR_TIMER_0
+RSEG SEG_REFRESH_SCREEN
+PJMPI_REFRESH_SCREEN:
     ; Wechsel auf die Registerbank 2
     SETB RS1
     ; Keine Instruktion. Der Assembler muss auch wissen,
@@ -13,16 +19,6 @@ CSEG AT ISR_TIMER_0
     MOV TH0, #0xF4
     MOV TL0, #0x48
     ; SETB TR0
-    CALL SEG_REFRESH_SCREEN
-    ; Wechsel auf die Registerbank 0
-    CLR RS1
-    ; Keine Instruktion. Der Assembler muss auch wissen,
-    ; dass ab hier die Registerbank 0 verwendet wird.
-    USING 0
-    RETI
-
-CSEG AT SEG_REFRESH_SCREEN
-FUN_REFRESH_SCREEN:
     MOV R7, SCREEN_REFRESH_CURRENT_ROW
     CALL FUN_REFRESH_SCREEN_ROW
     INC R7
@@ -30,7 +26,12 @@ FUN_REFRESH_SCREEN:
     MOV R7, #0
 RETURN:
     MOV SCREEN_REFRESH_CURRENT_ROW, R7
-    RET
+        ; Wechsel auf die Registerbank 0
+    CLR RS1
+    ; Keine Instruktion. Der Assembler muss auch wissen,
+    ; dass ab hier die Registerbank 0 verwendet wird.
+    USING 0
+    RETI
 
 ; Send a new batch of data to each segment
 ; PARAM R7 Current line (preserved)
@@ -51,22 +52,22 @@ RFS_SHIFT:
     DJNZ R1, RFS_SHIFT
     MOV R6, A
 RFS_SHIFT_DONE:
-    MOV DPTR, #LED_MATRIX_0_START
-    MOV R1, #GAMESCREEN_BEGIN + 1
+    MOV DPTR, #LED_MATRIX_0
+    MOV R1, #GAMESCREEN + 1
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 17
+    MOV R1, #GAMESCREEN + 17
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 33
+    MOV R1, #GAMESCREEN + 33
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 49
+    MOV R1, #GAMESCREEN + 49
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 0
+    MOV R1, #GAMESCREEN + 0
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 16
+    MOV R1, #GAMESCREEN + 16
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 32
+    MOV R1, #GAMESCREEN + 32
     CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN_BEGIN + 48
+    MOV R1, #GAMESCREEN + 48
     CALL FUN_REFRESH_MODULE
     RET
 
@@ -95,11 +96,6 @@ RF_WRITE:
     MOVX @DPTR, A
     INC DPTR
     RET
-
-
-
-
-
 
 
 END

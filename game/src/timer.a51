@@ -1,8 +1,11 @@
 NAME timer
 
-$INCLUDE(constants.a51)
+SEG_SETUP_TIMER_0 SEGMENT CODE
 
-CSEG AT SEG_SETUP_TIMER_0
+PUBLIC PFUN_SETUP_TIMER_0
+
+RSEG SEG_SETUP_TIMER_0
+PFUN_SETUP_TIMER_0:
     ; Timer 1 $ Timer 0
     ; MODE BITS
     ; GATE | Counter/Timer | Mode 1 | Mode 0
