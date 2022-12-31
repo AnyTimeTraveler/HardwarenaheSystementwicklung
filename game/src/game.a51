@@ -7,6 +7,7 @@ EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW, CURRENT_PIECE_INDEX)
 EXTRN DATA (CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_V_POS, CURRENT_PIECE_H_POS)
 EXTRN DATA (CP, GAMETICK_SUB_COUNTER, CURRENT_LEVEL, CURRENT_PIECE_DECOMPRESSED)
 EXTRN IDATA (GAMESCREEN, STACK)
+EXTRN NUMBER (PIECE_SIZE)
 PUBLIC PJMP_MAIN
 
 ; Main
@@ -18,25 +19,34 @@ PJMP_MAIN:
     CALL PFUN_SETUP_TIMERS
     ; Reset the screen driver row
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
-    ; CALL PFUN_DETECT_BAUDRATE
-    MOV CURRENT_PIECE_INDEX, #1
-    MOV CURRENT_PIECE_ROT_INDEX, #1
+    ; Put first piece on the screen
+    MOV CURRENT_PIECE_INDEX, #6
+    MOV CURRENT_PIECE_ROT_INDEX, #0
     CALL FUN_DECOMPRESS_PIECE
     MOV CURRENT_PIECE_V_POS, #0
+    CALL FUN_ADD_PIECE
 LOOP_MAIN:
     JMP LOOP_MAIN
 
 FUN_DECOMPRESS_PIECE:
     ; load compressed piece into R1 and R2
     MOV DPTR, #DAT_TETRIS_PIECES
+    ; add 8 * piece index to it,
+    ; to skip to the start of the correct piece
+    ; since each piece is 8 bytes
     MOV A, CURRENT_PIECE_INDEX
-    MOV B, #8
+    MOV B, #PIECE_SIZE
     MUL AB
+    ; add 2 * rotation, since every rotation is 2 bytes
     ADD A, CURRENT_PIECE_ROT_INDEX
     ADD A, CURRENT_PIECE_ROT_INDEX
+    ; save address in R1
     MOV R1, A
+    ; get byte
     MOVC A, @A + DPTR
+    ; swap adress back into A
     XCH A, R1
+    ; increment to get the second byte of the piece
     INC A
     MOVC A, @A + DPTR
     MOV R2, A
@@ -133,7 +143,7 @@ FUN_REMOVE_PIECE:
     ; load current piece byte
     MOV A, @R0
     ; invert byte
-    XRL A, 0xFF
+    XRL A, #0xFF
     ; logical and to cut out the piece
     ANL A, @R1
     ; write back to gamescreen
@@ -152,7 +162,7 @@ FUN_CHECK_COLLISION:
     MOV R0, #CP
     REPT 8
     MOV A, @R0
-    XRL A, 0xFF
+    XRL A, #0xFF
     ANL A, @R1
     MOV @R1, A
     INC R1
