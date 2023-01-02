@@ -260,10 +260,61 @@ SEG_ROWS SEGMENT CODE
 
 RSEG SEG_ROWS
 
-FUN_CLEAR_FULL_ROWS:
+; RETURN C if there is a full row
+; RETURN R1 address of full row, if any
+FUN_FIND_FULL_ROW:
+    MOV R1, #GAMESCREEN_END
+    DEC R1
+    ; now R1 is at the 2nd byte of the lowest line
+LINE_START:
+    CJNE @R1, #0xFF, SKIP_TWO
+    DEC R1
+    CJNE @R1, #0xFF, SKIP_ONE
+    ; full line has been found
+    SETB C
+    RET
+SKIP_TWO:
+    DEC R1
+SKIP_ONE:
+    DEC R1
+    ; keep going until we're at the top line
+    CJNE R1, #GAMESCREEN + 1, LINE_START
+    CLR C
     RET
 
+
+; PARAM R1 Row to clear (preserved)
+FUN_CLEAR_ROW:
+    MOV @R1, #0x80
+    INC R1
+    MOV @R1, #0x01
+    DEC R1
+    RET
+
+; PARAM R1 Row to fill (preserved)
+FUN_FILL_ROW:
+    MOV @R1, #0xFF
+    INC R1
+    MOV @R1, #0xFF
+    DEC R1
+    RET
+
+; PARAM R1 Row to fill first
 FUN_MOVE_ROWS_DOWN:
+    ; move R0 to the row above
+    MOV R0, R1
+    DEC R0
+    DEC R0
+MOVE_DOWN:
+    MOV A, @R1
+    MOV @R0, A
+    DEC R0
+    DEC R1
+    CJNE R1, #GAMESCREEN + 1, MOVE_DOWN
+    ; at the top row, draw the sides
+    MOV @R1, #0x01
+    DEC R1
+    MOV @R1, #0x80
     RET
 
 
@@ -377,6 +428,12 @@ HANDLE_MOVE_DOWN:
     JNC CAN_MOVE_DOWN
     DEC CURRENT_PIECE_V_POS
     CALL FUN_ADD_PIECE
+    CALL FUN_FIND_FULL_ROW
+    JNC NO_ROW_FILLED
+    ; R1 now contains the filled row adress (left/first byte)
+    CALL FUN_CLEAR_ROW
+    CALL FUN_MOVE_ROWS_DOWN
+NO_ROW_FILLED:
     MOV CURRENT_PIECE_V_POS, #0
     CALL FUN_SELECT_NEXT_PIECE
     CALL FUN_DECOMPRESS_PIECE
