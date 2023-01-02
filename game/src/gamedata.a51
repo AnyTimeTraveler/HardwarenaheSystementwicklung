@@ -43,34 +43,42 @@ PUBLIC DAT_TETRIS_PIECES, PIECE_SIZE
 
 RSEG SEG_PIECES
 DAT_TETRIS_PIECES:
+; 0
 P_LINE_000:         DW 0x4444
 P_LINE_090:         DW 0x0F00
 P_LINE_180:         DW 0x4444
 P_LINE_270:         DW 0x0F00
+; 1
 P_BUMP_000:         DW 0x4E00
 P_BUMP_090:         DW 0x4640
 P_BUMP_180:         DW 0x0E40
 P_BUMP_270:         DW 0x4C40
+; 2
 P_L_000:            DW 0x44C0
 P_L_090:            DW 0x8E00
 P_L_180:            DW 0x6440
 P_L_270:            DW 0x0E20
+; 3
 P_L_REV_000:        DW 0x4460
 P_L_REV_090:        DW 0x0E80
 P_L_REV_180:        DW 0xC440
 P_L_REV_270:        DW 0x8E00
+; 4
 P_SNAKE_000:        DW 0xC600
 P_SNAKE_090:        DW 0x2640
 P_SNAKE_180:        DW 0x0C60
 P_SNAKE_270:        DW 0x8C40
+; 5
 P_SNAME_REV_000:    DW 0x6C00
 P_SNAME_REV_090:    DW 0x4620
 P_SNAME_REV_180:    DW 0x06C0
 P_SNAME_REV_270:    DW 0x8C40
+; 6
 P_BOX_000:          DW 0xCC00
 P_BOX_090:          DW 0xCC00
 P_BOX_180:          DW 0xCC00
 P_BOX_270:          DW 0xCC00
+; 7
 P_EMPTY_000:        DW 0x0000
 P_EMPTY_090:        DW 0x0000
 P_EMPTY_180:        DW 0x0000
