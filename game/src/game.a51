@@ -258,13 +258,15 @@ OVERLAP:
 
 SEG_ROWS SEGMENT CODE
 
+EXTRN DATA (GAMESCREEN_END, REGISTER_BANK_0_BEGIN)
+
 RSEG SEG_ROWS
 
 ; RETURN C if there is a full row
 ; RETURN R1 address of full row, if any
 FUN_FIND_FULL_ROW:
-    MOV R1, #GAMESCREEN_END
-    DEC R1
+    ; start at the second to lowest line
+    MOV R1, #GAMESCREEN_END - 2
     ; now R1 is at the 2nd byte of the lowest line
 LINE_START:
     CJNE @R1, #0xFF, SKIP_TWO
@@ -302,12 +304,13 @@ FUN_FILL_ROW:
 ; PARAM R1 Row to fill first
 FUN_MOVE_ROWS_DOWN:
     ; move R0 to the row above
-    MOV R0, R1
-    DEC R0
+    ; equivalent to MOV R0, R1
+    MOV R0, REGISTER_BANK_0_BEGIN + 1
+    INC R1
     DEC R0
 MOVE_DOWN:
-    MOV A, @R1
-    MOV @R0, A
+    MOV A, @R0
+    MOV @R1, A
     DEC R0
     DEC R1
     CJNE R1, #GAMESCREEN + 1, MOVE_DOWN
@@ -331,8 +334,22 @@ STORE_NEXT_PIECE:
     MOV CURRENT_PIECE_INDEX, A
     RET
 
+; FUN_DRAW_OUTSIDE:
+;     MOV R6, #31
+;     MOV R0, #GAMESCREEN
+; DRAW_SIDES:
+;     MOV @R0, #1000$0000b
+;     INC R0
+;     MOV @R0, #0000$0001b
+;     INC R0
+;     DJNZ R6, DRAW_SIDES
+;     MOV @R0, #0xFF
+;     INC R0
+;     MOV @R0, #0xFF
+;     RET
+
 FUN_DRAW_OUTSIDE:
-    MOV R6, #31
+    MOV R6, #30
     MOV R0, #GAMESCREEN
 DRAW_SIDES:
     MOV @R0, #1000$0000b
@@ -340,6 +357,10 @@ DRAW_SIDES:
     MOV @R0, #0000$0001b
     INC R0
     DJNZ R6, DRAW_SIDES
+    MOV @R0, #0xFF
+    INC R0
+    MOV @R0, #0xFF
+    INC R0
     MOV @R0, #0xFF
     INC R0
     MOV @R0, #0xFF
@@ -427,11 +448,17 @@ HANDLE_MOVE_DOWN:
     CALL FUN_CHECK_COLLISION
     JNC CAN_MOVE_DOWN
     DEC CURRENT_PIECE_V_POS
+    MOV A, CURRENT_PIECE_V_POS
+    CJNE A, #0, STILL_ROOM
+    ; when we arrive here, the game has been lost
+    ; stop new pieces from spawning
+    ; TODO: switch gamestate (also todo) to end
+    RET
+STILL_ROOM:
     CALL FUN_ADD_PIECE
     CALL FUN_FIND_FULL_ROW
     JNC NO_ROW_FILLED
     ; R1 now contains the filled row adress (left/first byte)
-    CALL FUN_CLEAR_ROW
     CALL FUN_MOVE_ROWS_DOWN
 NO_ROW_FILLED:
     MOV CURRENT_PIECE_V_POS, #0
