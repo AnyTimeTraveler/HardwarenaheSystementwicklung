@@ -18,7 +18,7 @@ PJMP_MAIN:
     CALL PFUN_SETUP_TIMERS
     ; Reset the screen driver row
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
-    CALL FUN_DRAW_OUTSIDE
+    CALL FUN_DRAW_BACKGROUND
     ; Put first piece on the screen
     MOV CURRENT_PIECE_INDEX, #5
     MOV CURRENT_PIECE_ROT_INDEX, #0
@@ -334,22 +334,8 @@ STORE_NEXT_PIECE:
     MOV CURRENT_PIECE_INDEX, A
     RET
 
-; FUN_DRAW_OUTSIDE:
-;     MOV R6, #31
-;     MOV R0, #GAMESCREEN
-; DRAW_SIDES:
-;     MOV @R0, #1000$0000b
-;     INC R0
-;     MOV @R0, #0000$0001b
-;     INC R0
-;     DJNZ R6, DRAW_SIDES
-;     MOV @R0, #0xFF
-;     INC R0
-;     MOV @R0, #0xFF
-;     RET
-
-FUN_DRAW_OUTSIDE:
-    MOV R6, #30
+FUN_DRAW_BACKGROUND:
+    MOV R6, #31
     MOV R0, #GAMESCREEN
 DRAW_SIDES:
     MOV @R0, #1000$0000b
@@ -357,10 +343,6 @@ DRAW_SIDES:
     MOV @R0, #0000$0001b
     INC R0
     DJNZ R6, DRAW_SIDES
-    MOV @R0, #0xFF
-    INC R0
-    MOV @R0, #0xFF
-    INC R0
     MOV @R0, #0xFF
     INC R0
     MOV @R0, #0xFF
@@ -453,6 +435,7 @@ HANDLE_MOVE_DOWN:
     ; when we arrive here, the game has been lost
     ; stop new pieces from spawning
     ; TODO: switch gamestate (also todo) to end
+    CALL FUN_DRAW_BACKGROUND
     RET
 STILL_ROOM:
     CALL FUN_ADD_PIECE
