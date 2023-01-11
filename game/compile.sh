@@ -6,7 +6,7 @@ set -e
 KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
 MAIN="game"
 OUPTUT_PATH="./out/"
-SRC_FILES="allocations_idata allocations_xdata interrupts gamedata detect_baudrate screen timer"
+SRC_FILES="allocations_idata allocations_xdata keyboard interrupts gamedata detect_baudrate screen timer"
 
 function compile_file {
     file="$1"
