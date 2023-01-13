@@ -1,20 +1,16 @@
 NAME detect_baudrate
 
-EXTRN DATA (REGISTER_BANK_2_BEGIN)
-
-
-
-CSEG AT 0x0030
+; 
 
 
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
-EXTRN DATA (REGISTER_BANK_1_BEGIN)
+EXTRN DATA (REGISTER_BANK_1_BEGIN, REGISTER_BANK_2_BEGIN)
 EXTRN BIT (BIT_BAUDRATE_DETECTING, BIT_BAUD_ERROR_FLAG)
-PUBLIC PJMPI_DETECT_BAUDRATE
+PUBLIC PJMPI_DETECT_BAUDRATE_ISR, PFUN_DETECT_BAUDRATE
 
 RSEG SEG_DETECT_BAUDRATE
-PJMPI_DETECT_BAUDRATE:
+PJMPI_DETECT_BAUDRATE_ISR:
     ; Wenn der Timer noch nicht laeuft
     JB TR1, TIMER_ALREADY_RUNNING
     ; Timer 1 Run aktivieren
@@ -33,9 +29,11 @@ TIMER_ALREADY_RUNNING:
 RETURN:
     RETI
 
+PFUN_DETECT_BAUDRATE:
     SETB BIT_BAUDRATE_DETECTING
     ; Interrupt INT0 scharf schalten
     ; Der Interrupt startet dann Timer 1
+    SETB EX0
 
     ; Adresse wo die Werte abgespeichert werden sollen
     MOV R1, #REGISTER_BANK_1_BEGIN
@@ -53,12 +51,28 @@ RETURN:
 
 SAMPLE_GATHERING_OK:
     MOV R1, #REGISTER_BANK_1_BEGIN
+    MOV R2, #0
     MOV A, @R1
     INC R1
-ADD_TIMES:    
+ADD_TIMES:
     CALL FUN_ADD16
     INC R1
     CJNE R1, #REGISTER_BANK_2_BEGIN, ADD_TIMES
+    ; divide by 8
+    ; 2
+    CLR C
+    RRC R2
+    RRC A
+    ; 4
+    CLR C
+    RRC R2
+    RRC A
+    ; 8
+    CLR C
+    RRC R2
+    RRC A
+    ; done dividing. result in A
+
     
 
 
