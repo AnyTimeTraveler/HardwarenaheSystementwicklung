@@ -25,18 +25,20 @@ PFUN_SETUP_TIMERS:
     ; Timer 1 Interrupt aktivieren
     SETB ET1
     
-    ; Timer 0 Run aktivieren
+    ; Timer 0 Run (Gamescreen) aktivieren
     SETB TR0
-    ; Timer 1 Run aktivieren
-    SETB TR1
-    
+    ; Timer 1 Run (Gametick) deaktivieren, bis Baudrate-Detection fertig ist
+    CLR TR1
+
     RET
 
+SEG_TIMER_1_ISR SEGMENT CODE
 
 EXTRN BIT (BIT_BAUDRATE_DETECTING, BIT_BAUD_ERROR_FLAG)
 EXTRN CODE (PJMPI_SUB_GAMETICK)
 PUBLIC PJMPI_TIMER_1_ISR
 
+RSEG SEG_TIMER_1_ISR
 PJMPI_TIMER_1_ISR:
     JB BIT_BAUDRATE_DETECTING, DETECT_BAUDRATE
     JMP PJMPI_SUB_GAMETICK

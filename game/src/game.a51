@@ -17,6 +17,8 @@ PJMP_MAIN:
     MOV SP, #STACK
     CALL PFUN_SETUP_TIMERS
     CALL PFUN_DETECT_BAUDRATE
+    ; Activate timer 1 for gameticks
+    SETB TR1
     ; Reset the screen driver row
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
     CALL FUN_DRAW_BACKGROUND
