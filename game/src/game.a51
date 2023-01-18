@@ -18,12 +18,13 @@ PJMP_MAIN:
     ; normally, the stack starts at 0x07, which is the start of the second register bank
     MOV SP, #STACK
     CALL PFUN_SETUP_TIMERS
-    CALL FUN_CLEAR   
+    CALL FUN_CLEAR
     CALL PFUN_DETECT_BAUDRATE
     ; Activate timer 1 for gameticks
     CLR TR1
     CLR ET1  
     JMP $
+    SETB TR1
     ; Reset the screen driver row
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
     CALL FUN_DRAW_BACKGROUND
@@ -374,27 +375,24 @@ SEG_GAMETICK SEGMENT CODE
 PUBLIC PJMPI_SUB_GAMETICK
 
 RSEG SEG_GAMETICK
-PJMPI_SUB_GAMETICK:       
+PJMPI_SUB_GAMETICK:
     ; Reload with DF76
     ; for 200 Interrupts per Second
     ; Actually, reload with D20C
     ; for one tick every 7 ms (one gametick on lv 15) and scale from there
     CLR TR1
-    MOV TH1, #0xDF
-    MOV TL1, #0x76
+    MOV TH1, #0xD2
+    MOV TL1, #0x0C
     SETB TR1
 
-    ; increment gametick subcounter
-    MOV A, GAMETICK_SUB_COUNTER
-    DEC A
-    MOV GAMETICK_SUB_COUNTER, A
+    ; decrement gametick subcounter
+    DEC GAMETICK_SUB_COUNTER
     ; check if sub counter has been reached
     JNZ SUB_GAMETICK_RETURN
-    
+
     ; load max ticks for current level
     MOV DPTR, #DAT_LEVEL_TICKS
     MOV A, CURRENT_LEVEL
-    MOV A, #10
     MOVC A, @A+DPTR
     MOV GAMETICK_SUB_COUNTER, A
     

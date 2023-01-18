@@ -1,187 +1,133 @@
 NAME detect_baudrate
 
-; 
-
+$INCLUDE(macros.a51)
 
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
-EXTRN DATA (CLOCK_SAMPLES_BEGIN, CLOCK_SAMPLES_END, RCAP2L, RCAP2H, T2CON)
+EXTRN DATA (RCAP2L, RCAP2H, T2CON)
 EXTRN IDATA (GAMESCREEN)
-EXTRN BIT (BIT_BAUDRATE_DETECTING, BIT_BAUD_ERROR_FLAG, LED)
-PUBLIC PJMPI_DETECT_BAUDRATE_ISR, PFUN_DETECT_BAUDRATE
+PUBLIC PFUN_DETECT_BAUDRATE
 
 RSEG SEG_DETECT_BAUDRATE
-PJMPI_DETECT_BAUDRATE_ISR:
-    ; Wenn der Timer noch nicht laeuft
-    JB TR1, TIMER_ALREADY_RUNNING
-    ; Timer 1 Run aktivieren
-    SETB TR1
-    RETI
-TIMER_ALREADY_RUNNING:
-;    CLR TR1
-    ; Timer-Wert an Adresse in R2 speichern
-    MOV R3, TL1
-    MOV R3, TH1
-    ; Timer-Wert zuruecksetzen
-    MOV TL1, #0
-    MOV TH1, #0
-;    SETB TR1
-;    CALL FUN_ADD16
-    INC R2			    
-
-    MOV A, R2
-    MOV @R0, A
-    INC R0
-    MOV A, R3
-    MOV @R0, A
-    INC R0
-    INC R0
-    MOV A, R4
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0    
-    CJNE R2, #5, RETURN
-    ; Interrupt deaktivieren
-    CLR EX0
-RETURN:
-    RETI
-
 PFUN_DETECT_BAUDRATE:
-    SETB BIT_BAUDRATE_DETECTING   
-    ; Der Interrupt startet dann Timer 1
 
-    ; Sample count
-    MOV R2, #0
     MOV R0, #GAMESCREEN + 4
 
-    ; ACC
-    MOV R3, #0
-    MOV R4, #0
-    CLR BIT_BAUD_ERROR_FLAG
+INVALID_MEASUREMENT:
+    MOV TL1, #0
+    MOV TH1, #0
+    ; Basisformel:
+    ; x: Timer 1 Ticks
+    ; y: Timer 2 Baudrate Ticks
+    ; x * 6 / 16 = y
 
-    ; Timer 1 Interrupt aktivieren
-    CLR ET1
-    ; Interrupt INT0 scharf schalten
-    CLR EX0
-    ; Warte, bis Externer Interrupt 1 deaktiviert wurde
+    ; Anstatt der Multiplikation nehmen wir einfach die Zeit von 6 Tackten
+
+    ; Einen Tackt abwarten, dann 6 Tackte abzaehlen
     JB P3.2, $
     JNB P3.2, $
     JB P3.2, $
+    ; Timer starten
     SETB TR1
-    SETB LED
+    ; 1
     JNB P3.2, $
     JB P3.2, $
+    ; 2
+    JNB P3.2, $
+    JB P3.2, $
+    ; 3
+    JNB P3.2, $
+    JB P3.2, $
+    ; 4
+    JNB P3.2, $
+    JB P3.2, $
+    ; 5
+    JNB P3.2, $
+    JB P3.2, $
+
+    ; disable all interrupts for accurate measurement
+    CLR EA
+
+    ; 6
+    JNB P3.2, $
+    JB P3.2, $
+    ; Timer stoppen
     CLR TR1
 
+    ; enable all interrupts again
+    SETB EA
 
-    MOV @R0, #0x01
-    INC R0
+    DEBUGPRINT 0x01, TH1
+    DEBUGPRINT 0x02, TL1
+
+    ; Testen, ob Timer-Wert in einer Validen Range liegt
+
+    ; MIN | MAX
+    ; 600 | 1000
+
+    ; Anstatt zu pruefen, ob die Zahlen stimmen,
+    ; koennen wir einfach pruefen ob TH1 2 oder 3 ist.
+    ; Dies gibt einen Werterbereich von 512 bis 1023
+
     MOV A, TH1
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0    
-    MOV @R0, #0x02
-    INC R0
-    MOV A, TL1
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0
- 
-    JMP $
-    JNB BIT_BAUD_ERROR_FLAG, SAMPLE_GATHERING_OK
-    ; Retry
-    JMP SEG_DETECT_BAUDRATE
+    CJNE A, #2, CHECK_3
+    JMP VALID_MEASUREMENT
+CHECK_3:
+    CJNE A, #3, INVALID_MEASUREMENT
+VALID_MEASUREMENT:
 
-SAMPLE_GATHERING_OK:
+    ; Jetzt nurnoch durch 16 teilen und von 2^16 abziehen,
+    ; um den Reload-Wert zu erhalten
+
     ; Timer reload: 2^16 - (R4:R3 / 16)
 
-    MOV A, R4
-    MOV B, R3
+    ; Durch 16 teilen ist 4 mal shiften
+    ; 4 mal shiften ist einen Nibble raus schieben
 
-    ; / 2
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
+    ;    TH1    ||    TL1
+    ; THH | THL || TLH | TLL
+    ; wird verschoben nach:
+    ;     B     ||     A
+    ;  0  | THH || THL | TLH
 
-    ; / 4
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
-    
-    ; / 8    
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
-    
-    ; / 16    
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
+    ; So we move values into A and B
+    MOV A, TL1
+    MOV B, TH1
 
-    ; / 2 samples
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
+    ; We swap the lower nibbles of TL with TH:
+    ;     B     ||     A
+    ; THH | TLL || TLH | THL
+    MOV R1, #TH1
+    XCHD A, @R1
 
-    ; / 4 samples
-    CLR C
-    RRC A
-    XCH A, B
-    RRC A
-    XCH A, B
+    ; A now contains the right nibbles, but swapped
+    ; so we swap them:
+    ;     B     ||     A
+    ; THH | TLL || THL | TLH
+    ; The result is:
+    ;     A
+    ; THL | TLH
+    SWAP A
 
-    MOV R5, A
-    MOV R6, B
+    ; Now, we only need to substract to get the auto-reload value
+    ; reload = 2^16 - A
+
+    MOV R3, A
+    DEBUGPRINT 0x03, R3
+
+    ; backup A
+    MOV B, A
 
     MOV A, #0
     CLR C
-    SUBB A, R5
-    MOV R7, A
-    MOV A, #0
-    SUBB A, R6
+    SUBB A, B
 
-    ; auto-reload now in A:R7
-    MOV RCAP2H, A
-    MOV RCAP2L, R7
+    MOV R3, A
+    DEBUGPRINT 0x04, R3
 
-    MOV @R0, #0x41
-    INC R0
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0    
-    MOV @R0, #0x42
-    INC R0
-    MOV A, R7
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0
-    MOV @R0, #0x43
-    INC R0
-    MOV A, R3
-    MOV @R0, A
-    INC R0
-    INC R0
-    INC R0
-    MOV @R0, #0x44
-    INC R0
-    MOV A, R4
-    MOV @R0, A
-    
+    ; write auto-reload
+    MOV RCAP2H, #0xFF
+    MOV RCAP2L, A
 
     ; SERIAL CONTROL MODE BITS
     ; SM[0,1] | SM2 | REN | TB8 | RB8 | TI | RI
@@ -215,19 +161,7 @@ SAMPLE_GATHERING_OK:
     ; 
     MOV T2CON, #0011$0100b
 
-    CLR BIT_BAUDRATE_DETECTING
     RET
 
-; PARAM A: Address of Value to add to R4:R3
-; PARAM R3: Lower bits of Addition
-; PARAM R4: Higher bits of Addition
-FUN_ADD16:
-    ADD A, R3
-    JNC NO_OVERFLOW
-    ; Increment higher bits
-    INC R4
-NO_OVERFLOW:
-    MOV R3, A
-    RET
 
 END
