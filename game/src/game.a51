@@ -380,10 +380,8 @@ PJMPI_SUB_GAMETICK:
     ; for 200 Interrupts per Second
     ; Actually, reload with D20C
     ; for one tick every 7 ms (one gametick on lv 15) and scale from there
-    CLR TR1
     MOV TH1, #0xD2
     MOV TL1, #0x0C
-    SETB TR1
 
     ; decrement gametick subcounter
     DEC GAMETICK_SUB_COUNTER
