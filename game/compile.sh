@@ -2,8 +2,8 @@
 
 set -e
 
-# KEIL_PATH="../../Programme/Keil/C51/BIN"
-KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
+KEIL_PATH="../../Programme/Keil/C51/BIN"
+# KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
 MAIN="game"
 OUPTUT_PATH="./out/"
 SRC_FILES="allocations_idata allocations_xdata gamedata keyboard interrupts detect_baudrate screen setup"

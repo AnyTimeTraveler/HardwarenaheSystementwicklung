@@ -6,7 +6,7 @@ NAME gamedata
 
 SEG_LEVEL_TICKS SEGMENT CODE
 
-PUBLIC DAT_LEVEL_TICKS
+PUBLIC DAT_LEVEL_TICKS, DAT_LEVEL_TICKS_FAST
 
 RSEG SEG_LEVEL_TICKS
 DAT_LEVEL_TICKS:
@@ -24,6 +24,24 @@ DAT_LEVEL_TICKS:
     DB 6
     DB 4
     DB 3
+    DB 2
+    DB 1
+
+
+DAT_LEVEL_TICKS_FAST:
+    DB 25 ; TODO: remove! for testing only!
+    DB 71
+    DB 56
+    DB 44
+    DB 34
+    DB 25
+    DB 19
+    DB 14
+    DB 10
+    DB 7
+    DB 5
+    DB 3
+    DB 2
     DB 2
     DB 1
 

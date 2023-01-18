@@ -3,21 +3,22 @@ NAME screen
 SEG_REFRESH_SCREEN SEGMENT CODE
 
 EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW)
-EXTRN IDATA (GAMESCREEN)
+EXTRN IDATA (GAMESCREEN, COLOURMAP)
 EXTRN XDATA (LED_MATRIX_0)
 PUBLIC PJMPI_REFRESH_SCREEN
 
 RSEG SEG_REFRESH_SCREEN
 PJMPI_REFRESH_SCREEN:
+    ; Software reload
+    MOV TL0, #0x48
+    MOV TH0, #0xF4
+
     ; Wechsel auf die Registerbank 2
-    SETB RS1
+    SETB RS0
     ; Keine Instruktion. Der Assembler muss auch wissen,
     ; dass ab hier die Registerbank 2 verwendet wird.
-    USING 2
-    ; CLR TR0
-    MOV TH0, #0xF4
-    MOV TL0, #0x48
-    ; SETB TR0
+    USING 1
+
     MOV R7, SCREEN_REFRESH_CURRENT_ROW
     CALL FUN_REFRESH_SCREEN_ROW
     INC R7
@@ -26,11 +27,18 @@ PJMPI_REFRESH_SCREEN:
 RETURN:
     MOV SCREEN_REFRESH_CURRENT_ROW, R7
         ; Wechsel auf die Registerbank 0
-    CLR RS1
+    CLR RS0
     ; Keine Instruktion. Der Assembler muss auch wissen,
     ; dass ab hier die Registerbank 0 verwendet wird.
     USING 0
     RETI
+
+
+DRAW_SEGMENT MACRO OFFSET
+    MOV R1, #GAMESCREEN + OFFSET
+    MOV R0, #COLOURMAP + OFFSET
+    CALL FUN_REFRESH_MODULE
+ENDM
 
 ; Send a new batch of data to each segment
 ; PARAM R7 Current line (preserved)
@@ -39,7 +47,7 @@ FUN_REFRESH_SCREEN_ROW:
     ; R1 tracks the required rotations + 1
     ; since we only have do-while loops available
     ; the first loop iteration only shifts the bit form carry into the byte
-    USING 2
+    USING 1
     ; line is equivalent to MOV R1, R7
     MOV AR1, R7
     INC R1
@@ -53,24 +61,15 @@ RFS_SHIFT:
     MOV R6, A
 RFS_SHIFT_DONE:
     MOV DPTR, #LED_MATRIX_0
-    MOV R1, #GAMESCREEN + 0
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 16
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 32
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 48
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 1
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 17
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 33
-    CALL FUN_REFRESH_MODULE
-    MOV R1, #GAMESCREEN + 49
-    CALL FUN_REFRESH_MODULE
+    DRAW_SEGMENT 0
+    DRAW_SEGMENT 16
+    DRAW_SEGMENT 32
+    DRAW_SEGMENT 48
+    DRAW_SEGMENT 1
+    DRAW_SEGMENT 17
+    DRAW_SEGMENT 33
+    DRAW_SEGMENT 49
     RET
-
 
 ; RARAM R1 Gamescreen
 ; PARAM R6 Row-Bitmask
@@ -78,10 +77,19 @@ RFS_SHIFT_DONE:
 FUN_REFRESH_MODULE:
     MOV R5, #8
 RF_LOOP:
+    ; check if there is a pixel
     MOV A, @R1
     ANL A, R6
     JZ PIXEL_OFF
+PIXEL_ON:
+    MOV A, @R0
+    ANL A, R6
+    JZ GREEN
+RED:
     MOV A, #0x0F
+    JMP RF_WRITE
+GREEN:
+    MOV A, #0xF0
     JMP RF_WRITE
 PIXEL_OFF:
     MOV A, #0x00
@@ -89,6 +97,8 @@ RF_WRITE:
     MOVX @DPTR, A
     INC R1
     INC R1
+    INC R0
+    INC R0
     INC DPTR
     DJNZ R5, RF_LOOP
     MOV A, R7

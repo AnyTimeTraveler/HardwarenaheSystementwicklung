@@ -6,9 +6,9 @@ EXTRN CODE (DAT_LEVEL_TICKS, DAT_TETRIS_PIECES, PFUN_SETUP_TIMERS, PFUN_DETECT_B
 EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW, CURRENT_PIECE_INDEX)
 EXTRN DATA (CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_V_POS, CURRENT_PIECE_H_POS)
 EXTRN DATA (CP, GAMETICK_SUB_COUNTER, CURRENT_LEVEL, CURRENT_PIECE_DECOMPRESSED)
-EXTRN IDATA (GAMESCREEN, STACK)
+EXTRN IDATA (GAMESCREEN, COLOURMAP, STACK)
 EXTRN DATA (PIECE_SIZE)
-EXTRN BIT (LED)
+EXTRN BIT (BIT_CURRENT_COLOR, LED)
 PUBLIC PJMP_MAIN
 
 RSEG SEG_MAIN
@@ -18,13 +18,14 @@ PJMP_MAIN:
     ; normally, the stack starts at 0x07, which is the start of the second register bank
     MOV SP, #STACK
     CALL PFUN_SETUP_TIMERS
-    CALL FUN_CLEAR
-    CALL PFUN_DETECT_BAUDRATE
+    ; CALL FUN_CLEAR
+    ; CALL PFUN_DETECT_BAUDRATE
     ; Activate timer 1 for gameticks
-    CLR TR1
-    CLR ET1  
-    JMP $
+    ; CLR TR1
+    ; CLR ET1
+    ; JMP $
     SETB TR1
+    SETB ET1
     ; Reset the screen driver row
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
     CALL FUN_DRAW_BACKGROUND
@@ -34,6 +35,7 @@ PJMP_MAIN:
     CALL FUN_DECOMPRESS_PIECE
     MOV CURRENT_PIECE_V_POS, #0
     CALL FUN_ADD_PIECE
+    CALL FUN_ADD_PIECE_COLOR
 LOOP_MAIN:
     JMP LOOP_MAIN
 
@@ -211,6 +213,44 @@ FUN_ADD_PIECE:
 AP_RET:
     RET
 
+FUN_ADD_PIECE_COLOR:
+    ; move to current piece location
+    MOV A, #COLOURMAP
+    ADD A, CURRENT_PIECE_V_POS
+    ADD A, CURRENT_PIECE_V_POS
+    MOV R1, A
+    ; load current piece address
+    MOV R0, #CURRENT_PIECE_DECOMPRESSED
+
+    JNB BIT_CURRENT_COLOR, APC_REMOVE_BITS
+    REPT 8
+    ; load current piece byte
+    MOV A, @R0
+    ; or it with the gamescreen to insert it
+    ORL A, @R1
+    ; write back to gamescreen
+    MOV @R1, A
+    ; increment both adresses
+    INC R1
+    INC R0
+    ENDM
+    RET
+APC_REMOVE_BITS:
+    REPT 8
+    ; load current piece byte
+    MOV A, @R0
+    ; invert it
+    XRL A, #0xFF
+    ; or it with the gamescreen to insert it
+    ANL A, @R1
+    ; write back to gamescreen
+    MOV @R1, A
+    ; increment both adresses
+    INC R1
+    INC R0
+    ENDM
+    RET
+
 FUN_REMOVE_PIECE:
     JNB BIT_PIECE_ON_BOARD, RP_RET
     ; move to current piece location
@@ -314,7 +354,8 @@ FUN_FILL_ROW:
 FUN_MOVE_ROWS_DOWN:
     ; move R0 to the row above
     ; equivalent to MOV R0, R1
-    MOV R0, REGISTER_BANK_0_BEGIN + 1
+    USING 0
+    MOV R0, AR1
     INC R1
     DEC R0
 MOVE_DOWN:
@@ -329,6 +370,22 @@ MOVE_DOWN:
     MOV @R1, #0x80
     RET
 
+; PARAM R1 Row to fill first
+FUN_MOVE_ROWS_DOWN_COLOR:
+    ; move R0 to the row above
+    ; equivalent to MOV R0, R1
+    USING 0
+    MOV R0, AR1
+    INC R1
+    DEC R0
+MOVE_DOWN_COLOR:
+    MOV A, @R0
+    MOV @R1, A
+    DEC R0
+    DEC R1
+    CJNE R1, #COLOURMAP + 1, MOVE_DOWN_COLOR
+    RET
+
 
 SEG_BOARD_FUNCS SEGMENT CODE
 
@@ -341,11 +398,16 @@ FUN_SELECT_NEXT_PIECE:
     MOV A, #0
 STORE_NEXT_PIECE:
     MOV CURRENT_PIECE_INDEX, A
+    JB BIT_CURRENT_COLOR, CURRENT_COLOR_SET
+    SETB BIT_CURRENT_COLOR
+    RET
+CURRENT_COLOR_SET:
+    CLR BIT_CURRENT_COLOR
     RET
 
 
 FUN_CLEAR:
-    MOV R0, #GAMESCREEN    
+    MOV R0, #GAMESCREEN
     MOV @R0, #0xFF
     INC R0
     MOV @R0, #0xAA
@@ -372,6 +434,8 @@ DRAW_SIDES:
 
 SEG_GAMETICK SEGMENT CODE
 
+EXTRN CODE (DAT_LEVEL_TICKS_FAST)
+
 PUBLIC PJMPI_SUB_GAMETICK
 
 RSEG SEG_GAMETICK
@@ -384,12 +448,19 @@ PJMPI_SUB_GAMETICK:
     MOV TL1, #0x0C
 
     ; decrement gametick subcounter
-    DEC GAMETICK_SUB_COUNTER
+    MOV A, GAMETICK_SUB_COUNTER
+    DEC A
     ; check if sub counter has been reached
     JNZ SUB_GAMETICK_RETURN
 
     ; load max ticks for current level
+    JNB BIT_MOVE_DOWN, LOAD_NORMAL_TIMES
+    CLR BIT_MOVE_DOWN
+    MOV DPTR, #DAT_LEVEL_TICKS_FAST
+    JMP LOAD
+LOAD_NORMAL_TIMES:
     MOV DPTR, #DAT_LEVEL_TICKS
+LOAD:
     MOV A, CURRENT_LEVEL
     MOVC A, @A+DPTR
     MOV GAMETICK_SUB_COUNTER, A
@@ -456,16 +527,21 @@ HANDLE_MOVE_DOWN:
     RET
 STILL_ROOM:
     CALL FUN_ADD_PIECE
+    CALL FUN_ADD_PIECE_COLOR
     CALL FUN_FIND_FULL_ROW
     JNC NO_ROW_FILLED
     ; R1 now contains the filled row adress (left/first byte)
+    PUSH AR1
     CALL FUN_MOVE_ROWS_DOWN
+    POP AR1
+    CALL FUN_MOVE_ROWS_DOWN_COLOR
 NO_ROW_FILLED:
     MOV CURRENT_PIECE_V_POS, #0
     CALL FUN_SELECT_NEXT_PIECE
     CALL FUN_DECOMPRESS_PIECE
 CAN_MOVE_DOWN:
     CALL FUN_ADD_PIECE
+    CALL FUN_ADD_PIECE_COLOR
     RET
 
 
