@@ -6,7 +6,8 @@ NAME detect_baudrate
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
 EXTRN DATA (CLOCK_SAMPLES_BEGIN, CLOCK_SAMPLES_END, RCAP2L, RCAP2H, T2CON)
-EXTRN BIT (BIT_BAUDRATE_DETECTING, BIT_BAUD_ERROR_FLAG)
+EXTRN IDATA (GAMESCREEN)
+EXTRN BIT (BIT_BAUDRATE_DETECTING, BIT_BAUD_ERROR_FLAG, LED)
 PUBLIC PJMPI_DETECT_BAUDRATE_ISR, PFUN_DETECT_BAUDRATE
 
 RSEG SEG_DETECT_BAUDRATE
@@ -17,60 +18,170 @@ PJMPI_DETECT_BAUDRATE_ISR:
     SETB TR1
     RETI
 TIMER_ALREADY_RUNNING:
-    CLR TR1
+;    CLR TR1
     ; Timer-Wert an Adresse in R2 speichern
-    MOV @R1, TL1
+    MOV R3, TL1
+    MOV R3, TH1
     ; Timer-Wert zuruecksetzen
     MOV TL1, #0
-    SETB TR1
-    INC R1
-    ; Wenn alle 8 Register voll sind
-    CJNE R1, #CLOCK_SAMPLES_END + 1, RETURN
+    MOV TH1, #0
+;    SETB TR1
+;    CALL FUN_ADD16
+    INC R2			    
+
+    MOV A, R2
+    MOV @R0, A
+    INC R0
+    MOV A, R3
+    MOV @R0, A
+    INC R0
+    INC R0
+    MOV A, R4
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0    
+    CJNE R2, #5, RETURN
     ; Interrupt deaktivieren
-    CLR ET1
+    CLR EX0
 RETURN:
     RETI
 
 PFUN_DETECT_BAUDRATE:
-    SETB BIT_BAUDRATE_DETECTING
-    ; Interrupt INT0 scharf schalten
-    SETB EX0
+    SETB BIT_BAUDRATE_DETECTING   
     ; Der Interrupt startet dann Timer 1
 
-    ; Adresse wo die Werte abgespeichert werden sollen
-    MOV R1, #CLOCK_SAMPLES_BEGIN
+    ; Sample count
+    MOV R2, #0
+    MOV R0, #GAMESCREEN + 4
+
+    ; ACC
+    MOV R3, #0
+    MOV R4, #0
+    CLR BIT_BAUD_ERROR_FLAG
 
     ; Timer 1 Interrupt aktivieren
-    SETB ET1
-    ; Warte, bis Externer Interrupt 1 deaktiviert wurde
-    JB ET1, $
+    CLR ET1
+    ; Interrupt INT0 scharf schalten
     CLR EX0
+    ; Warte, bis Externer Interrupt 1 deaktiviert wurde
+    JB P3.2, $
+    JNB P3.2, $
+    JB P3.2, $
+    SETB TR1
+    SETB LED
+    JNB P3.2, $
+    JB P3.2, $
+    CLR TR1
+
+
+    MOV @R0, #0x01
+    INC R0
+    MOV A, TH1
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0    
+    MOV @R0, #0x02
+    INC R0
+    MOV A, TL1
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0
+ 
+    JMP $
     JNB BIT_BAUD_ERROR_FLAG, SAMPLE_GATHERING_OK
     ; Retry
     JMP SEG_DETECT_BAUDRATE
 
 SAMPLE_GATHERING_OK:
-    MOV R1, #CLOCK_SAMPLES_BEGIN
-    MOV R2, #0
-    MOV A, @R1
-    INC R1
-ADD_TIMES:
-    CALL FUN_ADD16
-    INC R1
-    CJNE R1, #CLOCK_SAMPLES_END + 1, ADD_TIMES
+    ; Timer reload: 2^16 - (R4:R3 / 16)
 
-    ; Timer reload: 2^16 - R2:A
-    ; backup lower sum in R3
-    MOV R3, A
-    MOV A, #255
+    MOV A, R4
+    MOV B, R3
+
+    ; / 2
     CLR C
-    SUBB A, R2
-    MOV R2, A
-    MOV A, #255
-    SUBB A, R3
-    ; auto-reload now in R2:A
-    MOV RCAP2L, A
-    MOV RCAP2H, R2
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+
+    ; / 4
+    CLR C
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+    
+    ; / 8    
+    CLR C
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+    
+    ; / 16    
+    CLR C
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+
+    ; / 2 samples
+    CLR C
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+
+    ; / 4 samples
+    CLR C
+    RRC A
+    XCH A, B
+    RRC A
+    XCH A, B
+
+    MOV R5, A
+    MOV R6, B
+
+    MOV A, #0
+    CLR C
+    SUBB A, R5
+    MOV R7, A
+    MOV A, #0
+    SUBB A, R6
+
+    ; auto-reload now in A:R7
+    MOV RCAP2H, A
+    MOV RCAP2L, R7
+
+    MOV @R0, #0x41
+    INC R0
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0    
+    MOV @R0, #0x42
+    INC R0
+    MOV A, R7
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0
+    MOV @R0, #0x43
+    INC R0
+    MOV A, R3
+    MOV @R0, A
+    INC R0
+    INC R0
+    INC R0
+    MOV @R0, #0x44
+    INC R0
+    MOV A, R4
+    MOV @R0, A
+    
 
     ; SERIAL CONTROL MODE BITS
     ; SM[0,1] | SM2 | REN | TB8 | RB8 | TI | RI
@@ -107,13 +218,16 @@ ADD_TIMES:
     CLR BIT_BAUDRATE_DETECTING
     RET
 
-; PARAM R1: Address of Value to add to A
-; PARAM R2: Higher bits of Addition
+; PARAM A: Address of Value to add to R4:R3
+; PARAM R3: Lower bits of Addition
+; PARAM R4: Higher bits of Addition
 FUN_ADD16:
-    ADD A, @R1
+    ADD A, R3
     JNC NO_OVERFLOW
-    INC R2
+    ; Increment higher bits
+    INC R4
 NO_OVERFLOW:
+    MOV R3, A
     RET
 
 END

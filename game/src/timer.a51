@@ -48,6 +48,6 @@ DETECT_BAUDRATE:
     ; Alles zuruecksetzen
     SETB BIT_BAUD_ERROR_FLAG
     ; Interrupt stoppen
-    CLR ET1
+    CLR EX0
     RETI
 END
