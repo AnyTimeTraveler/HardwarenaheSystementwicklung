@@ -2,7 +2,6 @@ NAME screen
 
 SEG_REFRESH_SCREEN SEGMENT CODE
 
-EXTRN DATA (REGISTER_BANK_2_BEGIN)
 EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW)
 EXTRN IDATA (GAMESCREEN)
 EXTRN XDATA (LED_MATRIX_0)
@@ -40,8 +39,9 @@ FUN_REFRESH_SCREEN_ROW:
     ; R1 tracks the required rotations + 1
     ; since we only have do-while loops available
     ; the first loop iteration only shifts the bit form carry into the byte
+    USING 2
     ; line is equivalent to MOV R1, R7
-    MOV REGISTER_BANK_2_BEGIN + 1, R7
+    MOV AR1, R7
     INC R1
     ; by shifting through carry and setting carry to 1
     ; we can shift once and end up with what would have been zero shifts
