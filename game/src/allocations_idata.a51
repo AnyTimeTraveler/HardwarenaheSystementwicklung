@@ -67,7 +67,7 @@ KEYBOARD_INPUT_BYTE:        DS 1
 KEYBOARD_TIMER_RELOAD:      DS 1
 ; BLINK_COUNTER:              DS 1
 
-PUBLIC T2CON, T2MOD, RCAP2L, RCAP2H, TL2, TH2
+PUBLIC T2CON, T2MOD, RCAP2L, RCAP2H, TL2, TH2, LED
 
 T2CON                       DATA 0xC8
 T2MOD                       DATA 0xC9
@@ -75,6 +75,7 @@ RCAP2L                      DATA 0xCA
 RCAP2H                      DATA 0xCB
 TL2                         DATA 0xCC
 TH2                         DATA 0xCD
+LED                         BIT P3.5
 
 PUBLIC GAMESCREEN, GAMESCREEN_END, GAMESCREEN_ROW_LEN, COLOURMAP, STACK
 
