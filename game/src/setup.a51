@@ -23,7 +23,7 @@ PFUN_SETUP_TIMERS:
     ; Timer 0 Interrupt aktivieren
     SETB ET0
     ; Timer 1 Interrupt aktivieren
-    SETB ET1
+    CLR ET1
     
     ; Timer 0 Run (Gamescreen) aktivieren
     SETB TR0

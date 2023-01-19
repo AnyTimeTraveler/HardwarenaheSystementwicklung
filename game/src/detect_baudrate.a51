@@ -1,10 +1,10 @@
-NAME detect_baudrate
-
+NAME detect_baudrate    		    
+       	             
 $INCLUDE(macros.a51)
 
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
-EXTRN DATA (RCAP2L, RCAP2H, T2CON)
+EXTRN DATA (RCAP2L, RCAP2H, T2CON, DEBUG, KEYBOARD_INPUT_BYTE)
 EXTRN IDATA (GAMESCREEN)
 PUBLIC PFUN_DETECT_BAUDRATE
 
@@ -25,8 +25,6 @@ INVALID_MEASUREMENT:
 
     ; Einen Tackt abwarten, dann 6 Tackte abzaehlen
     JB P3.2, $
-    JNB P3.2, $
-    JB P3.2, $
     ; Timer starten
     SETB TR1
     ; 1
@@ -44,12 +42,10 @@ INVALID_MEASUREMENT:
     ; 5
     JNB P3.2, $
     JB P3.2, $
-
-    ; disable all interrupts for accurate measurement
-    CLR EA
-
     ; 6
     JNB P3.2, $
+    ; disable all interrupts for accurate measurement
+    CLR EA
     JB P3.2, $
     ; Timer stoppen
     CLR TR1
@@ -57,8 +53,8 @@ INVALID_MEASUREMENT:
     ; enable all interrupts again
     SETB EA
 
-    DEBUGPRINT 0x01, TH1
-    DEBUGPRINT 0x02, TL1
+    DEBUGPRINT 0x01,TH1
+    DEBUGPRINT 0x02,TL1
 
     ; Testen, ob Timer-Wert in einer Validen Range liegt
 
@@ -90,14 +86,14 @@ VALID_MEASUREMENT:
     ;     B     ||     A
     ;  0  | THH || THL | TLH
 
-    ; So we move values into A and B
+    ; So we move values into ACC and a memory location
     MOV A, TL1
-    MOV B, TH1
+    MOV KEYBOARD_INPUT_BYTE, TH1
 
     ; We swap the lower nibbles of TL with TH:
     ;     B     ||     A
     ; THH | TLL || TLH | THL
-    MOV R1, #TH1
+    MOV R1, #KEYBOARD_INPUT_BYTE
     XCHD A, @R1
 
     ; A now contains the right nibbles, but swapped
@@ -113,8 +109,8 @@ VALID_MEASUREMENT:
     ; reload = 2^16 - A
 
     MOV R3, A
-    DEBUGPRINT 0x03, R3
-
+    DEBUGPRINT 0x03,R3
+    
     ; backup A
     MOV B, A
 
@@ -123,7 +119,15 @@ VALID_MEASUREMENT:
     SUBB A, B
 
     MOV R3, A
-    DEBUGPRINT 0x04, R3
+    DEBUGPRINT 0x04,R3
+    MOV DEBUG, R0
+
+    ; TODO: Remove!
+    CJNE A, #0xD3, ERROR
+    JMP AAAA
+ERROR:
+JMP $
+AAAA:
 
     ; write auto-reload
     MOV RCAP2H, #0xFF
@@ -160,6 +164,15 @@ VALID_MEASUREMENT:
     ; CPRL2 : capture/reload flag (ignored in baudarate gen. mode)
     ; 
     MOV T2CON, #0011$0100b
+
+    ; enable serial interrupts
+
+    ; give serial low priority
+    SETB PS
+    ; give screen (timer 0) high priority
+    CLR PT0
+
+    CLR PT1
 
     RET
 

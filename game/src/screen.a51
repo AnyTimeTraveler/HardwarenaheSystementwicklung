@@ -12,9 +12,11 @@ PJMPI_REFRESH_SCREEN:
     ; Software reload
     MOV TL0, #0x48
     MOV TH0, #0xF4
+    PUSH PSW
 
     ; Wechsel auf die Registerbank 2
     SETB RS0
+    CLR RS1
     ; Keine Instruktion. Der Assembler muss auch wissen,
     ; dass ab hier die Registerbank 2 verwendet wird.
     USING 1
@@ -26,11 +28,10 @@ PJMPI_REFRESH_SCREEN:
     MOV R7, #0
 RETURN:
     MOV SCREEN_REFRESH_CURRENT_ROW, R7
-        ; Wechsel auf die Registerbank 0
-    CLR RS0
     ; Keine Instruktion. Der Assembler muss auch wissen,
     ; dass ab hier die Registerbank 0 verwendet wird.
-    USING 0
+
+    POP PSW
     RETI
 
 

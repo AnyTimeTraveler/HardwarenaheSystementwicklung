@@ -10,7 +10,6 @@ PUBLIC DAT_LEVEL_TICKS
 
 RSEG SEG_LEVEL_TICKS
 DAT_LEVEL_TICKS:
-    DB 50 ; TODO: remove! for testing only!
     DB 142
     DB 112
     DB 88
