@@ -4,14 +4,15 @@ $INCLUDE(macros.a51)
 
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
-EXTRN DATA (RCAP2L, RCAP2H, T2CON, DEBUG, KEYBOARD_INPUT_BYTE)
-EXTRN IDATA (GAMESCREEN)
+EXTRN DATA (RCAP2L, RCAP2H, T2CON)
+; EXTRN IDATA (GAMESCREEN)
 PUBLIC PFUN_DETECT_BAUDRATE
 
 RSEG SEG_DETECT_BAUDRATE
 PFUN_DETECT_BAUDRATE:
+    USING 0
 
-    MOV R0, #GAMESCREEN + 4
+    ; MOV R0, #GAMESCREEN + 4
 
 INVALID_MEASUREMENT:
     MOV TL1, #0
@@ -53,8 +54,8 @@ INVALID_MEASUREMENT:
     ; enable all interrupts again
     SETB EA
 
-    DEBUGPRINT 0x01,TH1
-    DEBUGPRINT 0x02,TL1
+    ; DEBUGPRINT 0x01,TH1
+    ; DEBUGPRINT 0x02,TL1
 
     ; Testen, ob Timer-Wert in einer Validen Range liegt
 
@@ -88,12 +89,12 @@ VALID_MEASUREMENT:
 
     ; So we move values into ACC and a memory location
     MOV A, TL1
-    MOV KEYBOARD_INPUT_BYTE, TH1
+    MOV R2, TH1
 
     ; We swap the lower nibbles of TL with TH:
     ;     B     ||     A
     ; THH | TLL || TLH | THL
-    MOV R1, #KEYBOARD_INPUT_BYTE
+    MOV R1, #AR2
     XCHD A, @R1
 
     ; A now contains the right nibbles, but swapped
@@ -108,8 +109,8 @@ VALID_MEASUREMENT:
     ; Now, we only need to substract to get the auto-reload value
     ; reload = 2^16 - A
 
-    MOV R3, A
-    DEBUGPRINT 0x03,R3
+    ; MOV R3, A
+    ; DEBUGPRINT 0x03,R3
     
     ; backup A
     MOV B, A
@@ -118,16 +119,14 @@ VALID_MEASUREMENT:
     CLR C
     SUBB A, B
 
-    MOV R3, A
-    DEBUGPRINT 0x04,R3
-    MOV DEBUG, R0
+    ; MOV R3, A
+    ; DEBUGPRINT 0x04,R3
 
-    ; TODO: Remove!
-    CJNE A, #0xD3, ERROR
-    JMP AAAA
-ERROR:
-JMP $
-AAAA:
+;     CJNE A, #0xD3, ERROR
+;     JMP AAAA
+; ERROR:
+;     JMP $
+; AAAA:
 
     ; write auto-reload
     MOV RCAP2H, #0xFF

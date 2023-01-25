@@ -1,5 +1,31 @@
 NAME allocations_rom
 
+; ===============
+; == Gamestate ==
+; ===============
+
+PUBLIC GS_PRE_GAME, GS_PLAYING, GS_ROW_CLEARING, GS_LOST
+
+GS_PRE_GAME             EQU 0x00
+GS_PLAYING              EQU 0x01
+GS_ROW_CLEARING         EQU 0x02
+GS_LOST                 EQU 0x03
+
+
+; ====================
+; == Keyboard Codes ==
+; ====================
+
+PUBLIC KDB_EXTENDED, KDB_BREAK, KDB_KEY_LEFT_ARROW, KDB_KEY_RIGHT_ARROW, KDB_KEY_UP_ARROW, KDB_KEY_DOWN_ARROW, KDB_KEY_R
+
+KDB_EXTENDED             EQU 0xE0
+KDB_BREAK                EQU 0xF0
+KDB_KEY_LEFT_ARROW       EQU 0x6B
+KDB_KEY_RIGHT_ARROW      EQU 0x74
+KDB_KEY_UP_ARROW         EQU 0x75
+KDB_KEY_DOWN_ARROW       EQU 0x72
+KDB_KEY_R                EQU 0x2D
+
 ; =========================
 ; == Tetris Level Speeds ==
 ; =========================
