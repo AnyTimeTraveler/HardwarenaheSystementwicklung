@@ -1,5 +1,49 @@
 NAME allocations_rom
 
+; ==========
+; == Logo ==
+; ==========
+
+SEG_LOGO SEGMENT CODE
+
+PUBLIC DAT_LOGO
+
+RSEG SEG_LOGO
+DAT_LOGO:
+    DW 0x0000
+    DW 0x7E7C
+    DW 0x1840
+    DW 0x1840
+    DW 0x1878
+    DW 0x1840
+    DW 0x1840
+    DW 0x187C
+    DW 0x0000
+    DW 0x7E70
+    DW 0x1848
+    DW 0x1848
+    DW 0x1870
+    DW 0x1860
+    DW 0x1850
+    DW 0x1848
+    DW 0x0000
+    DW 0x1830
+    DW 0x1840
+    DW 0x1840
+    DW 0x1830
+    DW 0x1808
+    DW 0x1808
+    DW 0x1830
+    DW 0x0000
+    DW 0x0000
+    DW 0x0000
+    DW 0x0230
+    DW 0x0608
+    DW 0xA210
+    DW 0xA220
+    DW 0x42B8
+
+
 ; ===============
 ; == Gamestate ==
 ; ===============

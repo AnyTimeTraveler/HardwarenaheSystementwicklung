@@ -26,6 +26,8 @@ INVALID_MEASUREMENT:
 
     ; Einen Tackt abwarten, dann 6 Tackte abzaehlen
     JB P3.2, $
+    ; disable all interrupts for accurate measurement
+    CLR EA
     ; Timer starten
     SETB TR1
     ; 1
@@ -45,8 +47,6 @@ INVALID_MEASUREMENT:
     JB P3.2, $
     ; 6
     JNB P3.2, $
-    ; disable all interrupts for accurate measurement
-    CLR EA
     JB P3.2, $
     ; Timer stoppen
     CLR TR1
@@ -119,14 +119,7 @@ VALID_MEASUREMENT:
     CLR C
     SUBB A, B
 
-    ; MOV R3, A
-    ; DEBUGPRINT 0x04,R3
-
-;     CJNE A, #0xD3, ERROR
-;     JMP AAAA
-; ERROR:
-;     JMP $
-; AAAA:
+    CALL PFUN_SERIAL_WRITE
 
     ; write auto-reload
     MOV RCAP2H, #0xFF
