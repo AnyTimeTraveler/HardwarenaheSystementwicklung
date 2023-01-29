@@ -4,16 +4,16 @@ $INCLUDE(macros.a51)
 
 SEG_DETECT_BAUDRATE SEGMENT CODE
 
+EXTRN CODE (PFUN_SERIAL_WRITE)
 EXTRN DATA (RCAP2L, RCAP2H, T2CON)
-; EXTRN IDATA (GAMESCREEN)
+EXTRN BIT (IN_KEYBOARD_DATA, OUT_KEYBOARD, OUT_SCREEN)
 PUBLIC PFUN_DETECT_BAUDRATE
 
 RSEG SEG_DETECT_BAUDRATE
 PFUN_DETECT_BAUDRATE:
-    USING 0
-
-    ; MOV R0, #GAMESCREEN + 4
-
+    ; for debugging
+    SETB OUT_KEYBOARD
+    SETB OUT_SCREEN
 INVALID_MEASUREMENT:
     MOV TL1, #0
     MOV TH1, #0
@@ -25,37 +25,36 @@ INVALID_MEASUREMENT:
     ; Anstatt der Multiplikation nehmen wir einfach die Zeit von 6 Tackten
 
     ; Einen Tackt abwarten, dann 6 Tackte abzaehlen
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; disable all interrupts for accurate measurement
     CLR EA
     ; Timer starten
     SETB TR1
     ; 1
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; 2
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; 3
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; 4
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; 5
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; 6
-    JNB P3.2, $
-    JB P3.2, $
+    JNB IN_KEYBOARD_DATA, $
+    JB IN_KEYBOARD_DATA, $
     ; Timer stoppen
     CLR TR1
 
     ; enable all interrupts again
     SETB EA
-
-    ; DEBUGPRINT 0x01,TH1
-    ; DEBUGPRINT 0x02,TL1
 
     ; Testen, ob Timer-Wert in einer Validen Range liegt
 
@@ -89,15 +88,14 @@ VALID_MEASUREMENT:
 
     ; So we move values into ACC and a memory location
     MOV A, TL1
-    MOV R2, TH1
+    MOV R1, TH1
 
     ; We swap the lower nibbles of TL with TH:
     ;     B     ||     A
     ; THH | TLL || TLH | THL
-    MOV R1, #AR2
     XCHD A, @R1
 
-    ; A now contains the right nibbles, but swapped
+    ; ACC now contains the right nibbles, but swapped
     ; so we swap them:
     ;     B     ||     A
     ; THH | TLL || THL | TLH
@@ -108,9 +106,6 @@ VALID_MEASUREMENT:
 
     ; Now, we only need to substract to get the auto-reload value
     ; reload = 2^16 - A
-
-    ; MOV R3, A
-    ; DEBUGPRINT 0x03,R3
     
     ; backup A
     MOV B, A
@@ -120,52 +115,17 @@ VALID_MEASUREMENT:
     SUBB A, B
 
     CALL PFUN_SERIAL_WRITE
+    ; TODO: remove multiple writes, when confirmed that ACC isn't being changed
+    CALL PFUN_SERIAL_WRITE
+    CALL PFUN_SERIAL_WRITE
 
     ; write auto-reload
     MOV RCAP2H, #0xFF
     MOV RCAP2L, A
 
-    ; SERIAL CONTROL MODE BITS
-    ; SM[0,1] | SM2 | REN | TB8 | RB8 | TI | RI
-    ; 
-    ; SM 00 : Mode 0 : f/12 : shift
-    ; SM 01 : Mode 1 : var  : 8-bit
-    ; SM 10 : Mode 2 : f/32 : 9-bit
-    ; SM 11 : Mode 3 : var  : 9-bit
-    ; 
-    ; SM2   : Multiprocessor Mode
-    ; REN   : Receive enable
-    ; TB8   : 9th transmit bit
-    ; RB8   : 9th receive bit
-    ; TI    : transmit interrupt flag
-    ; RI    : receive interrupt flag
-    ;
-    MOV SCON, #1101$0000b
-
-    ; TIMER COUNTER 2 CONTROL MODE BITS
-    ; TF2 | EXF2 | RCLK | TCLK | EXEN2 | TR2 | CT2 | CPRL2
-    ; 
-    ; TF2   : timer 2 interrupt flag
-    ; EXF2  : timer 2 external flag
-    ; RCLK  : receive clock flag (baudrate generator)
-    ; TCLK  : transmit clock flag (baudrate generator)
-    ; 
-    ; EXEN2 : timer 2 external enable flag
-    ; TR2   : timer 2 run
-    ; CT2   : timer 2 counter / timer mode
-    ; CPRL2 : capture/reload flag (ignored in baudarate gen. mode)
-    ; 
-    MOV T2CON, #0011$0100b
-
-    ; enable serial interrupts
-
-    ; give serial low priority
-    SETB PS
-    ; give screen (timer 0) high priority
-    CLR PT0
-
-    CLR PT1
-
+    ; for debugging
+    CLR OUT_KEYBOARD
+    CLR OUT_SCREEN
     RET
 
 

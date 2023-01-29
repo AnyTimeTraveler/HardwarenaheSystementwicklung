@@ -2,36 +2,33 @@ NAME init
 
 SEG_INIT SEGMENT CODE
 
+EXTRN DATA (GAMESTATE, SCREEN_REFRESH_CURRENT_ROW, T2CON)
+EXTRN BIT (TR2)
+EXTRN CODE (GS_FIRST_RUN, PFUN_CLEAR_SCREEN, PFUN_DETECT_BAUDRATE, PFUN_FILL_SCREEN)
 PUBLIC PJMP_INIT
 
 RSEG SEG_INIT
 PJMP_INIT:
-    ; enable registerbank 0
+    ; user registerbank 0 for the whole program
     CLR RS0
     CLR RS1
 
-    ; turn on the LED
-    CLR LED
+    MOV GAMESTATE, #GS_FIRST_RUN
 
-    ; move stack to the indirect addressed area, so the other register banks are free
-    ; normally, the stack starts at 0x07, which is the start of the second register bank
-    MOV SP, #STACK
+    MOV SCREEN_REFRESH_CURRENT_ROW, #0
 
     CALL FUN_SETUP_TIMERS
 
-    ; CALL PFUN_CLEAR_SCREEN
+    ; Interrupts allgemein aktivieren
+    SETB EA
+
+    CALL FUN_SET_INTERRUPT_PRIORITIES
+
+    CALL PFUN_CLEAR_SCREEN
     CALL PFUN_DETECT_BAUDRATE
-    ; CALL PFUN_FILL_SCREEN
+    CALL FUN_SETUP_SERIAL
+    CALL PFUN_FILL_SCREEN
 
-    ; reset game to initial state before starting timer 1 to run gameticks
-    CALL PFUN_RESET_GAME
-
-    ; enable serial interrupt for keyboard input
-    SETB ES
-
-    ; enable timer 1 for gameticks
-    SETB TR1
-    SETB ET1
 LOOP_MAIN:
     JMP LOOP_MAIN
 
@@ -50,19 +47,81 @@ FUN_SETUP_TIMERS:
     ; 
     MOV TMOD, #0001$0001b
     
-    ; Interrupts allgemein aktivieren
-    SETB EA
-    
+
+    ; TIMER COUNTER 2 CONTROL MODE BITS
+    ; TF2 | EXF2 | RCLK | TCLK | EXEN2 | TR2 | CT2 | CPRL2
+    ; 
+    ; TF2   : timer 2 interrupt flag
+    ; EXF2  : timer 2 external flag
+    ; RCLK  : receive clock flag (baudrate generator)
+    ; TCLK  : transmit clock flag (baudrate generator)
+    ; 
+    ; EXEN2 : timer 2 external enable flag
+    ; TR2   : timer 2 run
+    ; CT2   : timer 2 counter / timer mode
+    ; CPRL2 : capture/reload flag (ignored in baudarate gen. mode)
+    ; 
+    MOV T2CON, #0000$0000b
+
+
     ; Timer 0 Interrupt aktivieren
     SETB ET0
-    ; Timer 1 Interrupt aktivieren
+    ; Timer 1 Interrupt deaktivieren
     CLR ET1
-    
+
     ; Timer 0 Run (Gamescreen) aktivieren
     SETB TR0
-    ; Timer 1 Run (Gametick) deaktivieren, bis Baudrate-Detection fertig ist
-    CLR TR1
+    ; Timer 1 Run (Gametick) aktivieren
+    SETB TR1
+    ; Timer 2 Run (Serial Baudrate / Baudrate Detection) deaktivieren
+    CLR TR2
 
+    RET
+
+FUN_SETUP_SERIAL:
+    ; TIMER COUNTER 2 CONTROL MODE BITS
+    ; TF2 | EXF2 | RCLK | TCLK | EXEN2 | TR2 | CT2 | CPRL2
+    ; 
+    ; TF2   : timer 2 interrupt flag
+    ; EXF2  : timer 2 external flag
+    ; RCLK  : receive clock flag (baudrate generator)
+    ; TCLK  : transmit clock flag (baudrate generator)
+    ; 
+    ; EXEN2 : timer 2 external enable flag
+    ; TR2   : timer 2 run
+    ; CT2   : timer 2 counter / timer mode
+    ; CPRL2 : capture/reload flag (ignored in baudarate gen. mode)
+    ; 
+    MOV T2CON, #0011$0100b
+
+    ; SERIAL CONTROL MODE BITS
+    ; SM[0,1] | SM2 | REN | TB8 | RB8 | TI | RI
+    ; 
+    ; SM 00 : Mode 0 : f/12 : shift
+    ; SM 01 : Mode 1 : var  : 8-bit
+    ; SM 10 : Mode 2 : f/32 : 9-bit
+    ; SM 11 : Mode 3 : var  : 9-bit
+    ; 
+    ; SM2   : Multiprocessor Mode
+    ; REN   : Receive enable
+    ; TB8   : 9th transmit bit
+    ; RB8   : 9th receive bit
+    ; TI    : transmit interrupt flag
+    ; RI    : receive interrupt flag
+    ;
+    MOV SCON, #1101$0000b
+
+    ; enable serial interrupts
+    SETB ES
+    RET
+
+FUN_SET_INTERRUPT_PRIORITIES:
+    ; give screen (timer 0) high priority
+    SETB PT0
+    ; give keyboard (serial) low priority
+    CLR PS
+    ; give gameticks (timer 1) low priority
+    CLR PT1
     RET
 
 END

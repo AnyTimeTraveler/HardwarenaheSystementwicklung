@@ -1,22 +1,22 @@
 NAME debug
 
+SEG_DEBUG SEGMENT CODE
+
+EXTRN BIT (OUT_DATA, OUT_CLK)
 PUBLIC PFUN_SERIAL_WRITE
 
+RSEG SEG_DEBUG
+; Writes one byte (ACC) msb-first to serial
+; ACC is preserved, Carry is cleared
 PFUN_SERIAL_WRITE:
     REPT 8
-    CLR C
-    RRC A
-    MOV P1.4, C
-    SETB P1.3
-    ; NOP
-    ; NOP
-    ; NOP
-    CLR P1.3
-    CLR P1.4
-    ; NOP
-    ; NOP
-    ; NOP
+        RLC A
+        MOV OUT_DATA, C
+        SETB OUT_CLK
+        CLR OUT_CLK
+        ;CLR OUT_DATA
     ENDM
+    RLC A
     RET
 
 END

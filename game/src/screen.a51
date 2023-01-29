@@ -3,24 +3,18 @@ NAME screen
 SEG_REFRESH_SCREEN SEGMENT CODE
 
 EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW)
-EXTRN IDATA (GAMESCREEN, COLOURMAP)
-EXTRN XDATA (LED_MATRIX_0)
+EXTRN IDATA (GAMESCREEN_0, GAMESCREEN_1, GAMESCREEN_2)
+EXTRN XDATA (LED_MATRIX_0, LED_MATRIX_1, LED_MATRIX_2)
 EXTRN CODE (PFUN_SERIAL_WRITE)
+EXTRN BIT (OUT_SCREEN)
 PUBLIC PJMPI_REFRESH_SCREEN
 
 RSEG SEG_REFRESH_SCREEN
 PJMPI_REFRESH_SCREEN:
+    SETB OUT_SCREEN
     ; Software reload
     MOV TL0, #0x48
     MOV TH0, #0xF4
-    PUSH PSW
-
-    ; Wechsel auf die Registerbank 2
-    SETB RS0
-    CLR RS1
-    ; Keine Instruktion. Der Assembler muss auch wissen,
-    ; dass ab hier die Registerbank 2 verwendet wird.
-    USING 1
 
     MOV R7, SCREEN_REFRESH_CURRENT_ROW
     CALL FUN_REFRESH_SCREEN_ROW
@@ -31,21 +25,13 @@ RETURN:
     MOV SCREEN_REFRESH_CURRENT_ROW, R7
     ; Keine Instruktion. Der Assembler muss auch wissen,
     ; dass ab hier die Registerbank 0 verwendet wird.
-
-    POP PSW
+    CLR OUT_SCREEN
     RETI
 
 
-DRAW_RGB_SEG MACRO SEGMENT_INDEX, OFFSET
-    MOV DPL, #SEGMENT_INDEX
-    MOV R1, #GAMESCREEN + OFFSET
-    MOV R0, #COLOURMAP + OFFSET
-    CALL FUN_REFRESH_RGB_MODULE
-ENDM
-
 DRAW_SEGMENT MACRO OFFSET
-    MOV R1, #GAMESCREEN + OFFSET
-    MOV R0, #COLOURMAP + OFFSET
+    MOV R1, #GAMESCREEN_0 + OFFSET
+    MOV R0, #GAMESCREEN_1 + OFFSET
     CALL FUN_REFRESH_MODULE
 ENDM
 
@@ -56,9 +42,9 @@ FUN_REFRESH_SCREEN_ROW:
     ; R1 tracks the required rotations + 1
     ; since we only have do-while loops available
     ; the first loop iteration only shifts the bit form carry into the byte
-    USING 1
     ; line is equivalent to MOV R1, R7
-    MOV AR1, R7
+    MOV A, R7
+    MOV R1, A
     INC R1
     ; by shifting through carry and setting carry to 1
     ; we can shift once and end up with what would have been zero shifts
@@ -70,19 +56,6 @@ RFS_SHIFT:
     MOV R6, A
 RFS_SHIFT_DONE:
     MOV DPTR, #LED_MATRIX_0
-    CALL FUN_SERIAL_WRITE
-    MOV A, #0xFF
-    CALL FUN_SERIAL_WRITE
-    DRAW_RGB_SEG 0x00,0
-    DRAW_RGB_SEG 0x10,16
-    DRAW_RGB_SEG 0x20,32
-    DRAW_RGB_SEG 0x30,48
-    DRAW_RGB_SEG 0x40,1
-    DRAW_RGB_SEG 0x50,17
-    DRAW_RGB_SEG 0x60,33
-    DRAW_RGB_SEG 0x70,49
-
-    MOV DPTR, #LED_MATRIX_1
     DRAW_SEGMENT 0
     DRAW_SEGMENT 16
     DRAW_SEGMENT 32
@@ -91,8 +64,6 @@ RFS_SHIFT_DONE:
     DRAW_SEGMENT 17
     DRAW_SEGMENT 33
     DRAW_SEGMENT 49
-    MOV A, #0xFF
-    CALL FUN_SERIAL_WRITE
     RET
 
 ; RARAM R1 Gamescreen
@@ -110,18 +81,15 @@ PIXEL_ON:
     ANL A, R6
     JZ GREEN
 RED:
-    MOV A, #0x30 ; RGB
-    ; MOV A, #0x0F ; RG
+    MOV A, #0x0F
     JMP RF_WRITE
 GREEN:
-    MOV A, #0x0C ; RGB
-    ; MOV A, #0xF0 ; RG
+    MOV A, #0xF0
     JMP RF_WRITE
 PIXEL_OFF:
     MOV A, #0x00
 RF_WRITE:
     MOVX @DPTR, A
-    CALL FUN_SERIAL_WRITE
     INC R1
     INC R1
     INC R0
@@ -131,48 +99,6 @@ RF_WRITE:
     MOV A, R7
     ORL A, #0x08
     MOVX @DPTR, A
-    CALL FUN_SERIAL_WRITE
-    INC DPTR
-    RET
-
-
-; RARAM R1 Gamescreen
-; PARAM R6 Row-Bitmask
-; PARAM R7 Current line (preserved)
-FUN_REFRESH_RGB_MODULE:
-    MOV R5, #8
-RGB_RF_LOOP:
-    ; check if there is a pixel
-    MOV A, @R1
-    ANL A, R6
-    JZ RGB_PIXEL_OFF
-RGB_PIXEL_ON:
-    MOV A, @R0
-    ANL A, R6
-    JZ RGB_GREEN
-RGB_RED:
-    MOV A, #0x30 ; RGB
-    ; MOV A, #0x0F ; RG
-    JMP RGB_RF_WRITE
-RGB_GREEN:
-    MOV A, #0x0C ; RGB
-    ; MOV A, #0xF0 ; RG
-    JMP RGB_RF_WRITE
-RGB_PIXEL_OFF:
-    MOV A, #0x00
-RGB_RF_WRITE:
-    MOVX @DPTR, A
-    CALL FUN_SERIAL_WRITE
-    INC R1
-    INC R1
-    INC R0
-    INC R0
-    INC DPTR
-    DJNZ R5, RGB_RF_LOOP
-    MOV A, R7
-    ORL A, #0x08
-    MOVX @DPTR, A
-    CALL FUN_SERIAL_WRITE
     INC DPTR
     RET
 

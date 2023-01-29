@@ -1,52 +1,27 @@
 NAME allocations_idata
 
-; =============
-; == INT RAM ==
-; =============
 
-; BEGIN Register
-PUBLIC REGISTER_BANK_0_BEGIN, REGISTER_BANK_1_BEGIN, REGISTER_BANK_2_BEGIN, REGISTER_BANK_3_BEGIN
+; ==============
+; == DATA RAM ==
+; ==============
 
-REGISTER_BANK_0_BEGIN       DATA 0x00
-REGISTER_BANK_1_BEGIN       DATA 0x08
-REGISTER_BANK_2_BEGIN       DATA 0x10
-REGISTER_BANK_3_BEGIN       DATA 0x18
-; END Register
-
-; BEGIN Bit Addressable
-PUBLIC CURRENT_PIECE_DECOMPRESSED, CP, CP_R0_L, CP_R0_R, CP_R1_L, CP_R1_R, CP_R2_L, CP_R2_R, CP_R3_L, CP_R3_R
-PUBLIC BIT_PIECE_ON_BOARD, BIT_KEYBOARD_BREAK, BIT_CURRENT_COLOR
-
-CURRENT_PIECE_DECOMPRESSED  DATA 0x20 ; length 8
-CP                          DATA 0x20
-CP_R0_L                     DATA 0x20
-CP_R0_R                     DATA 0x21
-CP_R1_L                     DATA 0x22
-CP_R1_R                     DATA 0x23
-CP_R2_L                     DATA 0x24
-CP_R2_R                     DATA 0x25
-CP_R3_L                     DATA 0x26
-CP_R3_R                     DATA 0x27
-CURRENT_PIECE_LENGTH        EQU  0x08
+PUBLIC BIT_KEYBOARD_BREAK, BIT_CURRENT_COLOR, BIT_RUN_GAMETICK
 
 BSEG AT 0x20
-CP_R0_L_B:                  DBIT 8
-CP_R0_R_B:                  DBIT 8
-CP_R1_L_B:                  DBIT 8
-CP_R1_R_B:                  DBIT 8
-CP_R2_L_B:                  DBIT 8
-CP_R2_R_B:                  DBIT 8
-CP_R3_L_B:                  DBIT 8
-CP_R3_R_B:                  DBIT 8
-BIT_PIECE_ON_BOARD:         DBIT 1
 BIT_KEYBOARD_BREAK:         DBIT 1
 BIT_CURRENT_COLOR:          DBIT 1
-; END Bit Addressable
+BIT_RUN_GAMETICK:           DBIT 1
+BIT_MULTI_SCREEN_MODE:      DBIT 1
 
-; BEGIN Internal RAM
-PUBLIC  GAMETICK_SUB_COUNTER, CURRENT_LEVEL, CURRENT_PIECE_INDEX, CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_V_POS, CURRENT_PIECE_H_POS, SCREEN_REFRESH_CURRENT_ROW, GAMESTATE
 
-DSEG AT 0x30
+SEG_VARIABLES SEGMENT DATA
+
+PUBLIC CURRENT_PIECE_DECOMPRESSED, CP, CP_R0_L, CP_R0_R, CP_R1_L, CP_R1_R, CP_R2_L, CP_R2_R, CP_R3_L, CP_R3_R
+PUBLIC GAMETICK_SUB_COUNTER, CURRENT_LEVEL, CURRENT_PIECE_INDEX, CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_V_POS
+PUBLIC CURRENT_PIECE_H_POS, SCREEN_REFRESH_CURRENT_ROW, GAMESTATE, SCREENMODE, CLEARING_ROW
+
+RSEG SEG_VARIABLES
+CURRENT_PIECE_DECOMPRESSED: DS 8
 GAMETICK_SUB_COUNTER:       DS 1
 CURRENT_LEVEL:              DS 1
 CURRENT_PIECE_INDEX:        DS 1
@@ -55,27 +30,53 @@ CURRENT_PIECE_V_POS:        DS 1
 CURRENT_PIECE_H_POS:        DS 1
 SCREEN_REFRESH_CURRENT_ROW: DS 1
 GAMESTATE:                  DS 1
+SCREENMODE:                 DS 1
 CLEARING_ROW:               DS 1
 
-PUBLIC T2CON, RCAP2L, RCAP2H, TL2, TH2, LED
+CP                          DATA CURRENT_PIECE_DECOMPRESSED
+CP_R0_L                     DATA CP + 0
+CP_R0_R                     DATA CP + 1
+CP_R1_L                     DATA CP + 2
+CP_R1_R                     DATA CP + 3
+CP_R2_L                     DATA CP + 4
+CP_R2_R                     DATA CP + 5
+CP_R3_L                     DATA CP + 6
+CP_R3_R                     DATA CP + 7
+CURRENT_PIECE_LENGTH        EQU  0x08
+
+
+; ===============
+; == IDATA SFR ==
+; ===============
+
+PUBLIC T2CON, RCAP2L, RCAP2H, TL2, TH2, OUT_LED
 
 T2CON                       DATA 0xC8
 RCAP2L                      DATA 0xCA
 RCAP2H                      DATA 0xCB
 TL2                         DATA 0xCC
 TH2                         DATA 0xCD
-LED                         BIT P3.5
+OUT_CLK                     BIT P1.0
+OUT_DATA                    BIT P1.1
+OUT_GAMETICK                BIT P1.2
+OUT_SCREEN                  BIT P1.3
+OUT_KEYBOARD                BIT P1.4
+IN_KEYBOARD_DATA            BIT P3.2
+OUT_LED                     BIT P3.5
 
-PUBLIC GAMESCREEN, GAMESCREEN_END, GAMESCREEN_LEN, GAMESCREEN_ROW_LEN, COLOURMAP, STACK
 
-GAMESCREEN_END              IDATA GAMESCREEN + 0x3F
+; ===============
+; == IDATA RAM ==
+; ===============
+
+PUBLIC GAMESCREEN_0, GAMESCREEN_1, GAMESCREEN_2, GAMESCREEN_LEN, GAMESCREEN_ROW_LEN
+
 GAMESCREEN_LEN              EQU 0x40
-
-ISEG AT 0x60
-GAMESCREEN:                 DS 0x40
 GAMESCREEN_ROW_LEN          EQU 0x04
-COLOURMAP:                  DS 0x40
-STACK:                      DS 0x20
-; END Internal RAM
+
+ISEG AT 0x40
+GAMESCREEN_0:               DS 0x40
+GAMESCREEN_1:               DS 0x40
+GAMESCREEN_2:               DS 0x40
 
 END

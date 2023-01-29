@@ -48,12 +48,13 @@ DAT_LOGO:
 ; == Gamestate ==
 ; ===============
 
-PUBLIC GS_PRE_GAME, GS_PLAYING, GS_ROW_CLEARING, GS_LOST
+PUBLIC GS_FIRST_RUN, GS_PRE_GAME, GS_PLAYING, GS_ROW_CLEARING, GS_LOST
 
-GS_PRE_GAME             EQU 0x00
-GS_PLAYING              EQU 0x01
-GS_ROW_CLEARING         EQU 0x02
-GS_LOST                 EQU 0x03
+GS_FIRST_RUN            EQU 0x00
+GS_PRE_GAME             EQU 0x01
+GS_PLAYING              EQU 0x02
+GS_ROW_CLEARING         EQU 0x03
+GS_LOST                 EQU 0x04
 
 
 ; ====================
@@ -80,6 +81,7 @@ PUBLIC DAT_LEVEL_TICKS
 
 RSEG SEG_LEVEL_TICKS
 DAT_LEVEL_TICKS:
+    DB 35           ; idle animation ticks ( = 250 ms per tick)
     DB 142
     DB 112
     DB 88

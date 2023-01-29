@@ -2,11 +2,11 @@
 
 set -e
 
-KEIL_PATH="../../Programme/Keil/C51/BIN"
-# KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
-MAIN="game"
+# KEIL_PATH="../../Programme/Keil/C51/BIN"
+KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
+MAIN="init"
 OUPTUT_PATH="./out/"
-SRC_FILES="init allocations_idata allocations_xdata allocations_rom keyboard interrupts detect_baudrate screen debug"
+SRC_FILES="allocations_idata allocations_xdata allocations_rom keyboard interrupts detect_baudrate game_screen game_current_piece game_logic screen debug"
 
 function compile_file {
     file="$1"
@@ -26,6 +26,7 @@ function clean_output {
 function clean_byproducts {
     rm ./*.a51
     rm ./*.OBJ
+    sed -i '/^\f/d' ./*
 }
 
 function generate_lnp {
