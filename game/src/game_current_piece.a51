@@ -3,7 +3,7 @@ NAME game_current_piece
 SEG_CURRENT_PIECE SEGMENT CODE
 
 EXTRN DATA (CURRENT_PIECE_INDEX, CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_H_POS)
-EXTRN DATA (CP_R0_L, CP_R0_R, CP_R1_L, CP_R1_R, CP_R2_L, CP_R2_R, CP_R3_L, CP_R3_R)
+EXTRN DATA (CP_R0_L, CP_R0_M, CP_R0_R, CP_R1_L, CP_R1_M, CP_R1_R, CP_R2_L, CP_R2_M, CP_R2_R, CP_R3_L, CP_R3_M, CP_R3_R)
 PUBLIC PFUN_DECOMPRESS_PIECE, PFUN_SHIFT_PIECE_LEFT, PFUN_SHIFT_PIECE_RIGHT, PFUN_ROTATE_PIECE_RIGHT, PFUN_ROTATE_PIECE_LEFT
 EXTRN CODE (DAT_TETRIS_PIECES)
 EXTRN NUMBER (PIECE_SIZE)
@@ -37,45 +37,55 @@ PFUN_DECOMPRESS_PIECE:
     ; Overwrite the decompressed piece
     ; first nibble of byte 0
     MOV CP_R0_L, #0
-    MOV CP_R0_R, R1
-    ANL CP_R0_R, #0xF0
+    MOV CP_R0_M, R1
+    ANL CP_R0_M, #0xF0
+    MOV CP_R0_R, #0
     ; second nibble of byte 0
     MOV CP_R1_L, #0
     MOV A, R1
     SWAP A
     ANL A, #0xF0
-    MOV CP_R1_R, A
+    MOV CP_R1_M, A
+    MOV CP_R1_R, #0
     ; first nibble of byte 1
     MOV CP_R2_L, #0
-    MOV CP_R2_R, R2
-    ANL CP_R2_R, #0xF0
+    MOV CP_R2_M, R2
+    ANL CP_R2_M, #0xF0
+    MOV CP_R2_R, #0
     ; second nibble of byte 1
     MOV CP_R3_L, #0
     MOV A, R2
     SWAP A
     ANL A, #0xF0
-    MOV CP_R3_R, A
+    MOV CP_R3_M, A
+    MOV CP_R3_R, #0
     MOV CURRENT_PIECE_H_POS, #8
     RET
 
 MOVE_ROW_LEFT MACRO ROW
-CLR C
-MOV A, ROW&_R
-RLC A
-MOV ROW&_R, A
-MOV A, ROW&_L
-RLC A
-MOV ROW&_L, A
+    CLR C
+    MOV A, ROW&_R
+    RLC A
+    MOV ROW&_R, A
+    MOV A, ROW&_M
+    RLC A
+    MOV ROW&_M, A
+    MOV A, ROW&_L
+    RLC A
+    MOV ROW&_L, A
 ENDM
 
 MOVE_ROW_RIGHT MACRO ROW
-CLR C
-MOV A, ROW&_L
-RRC A
-MOV ROW&_L, A
-MOV A, ROW&_R
-RRC A
-MOV ROW&_R, A
+    CLR C
+    MOV A, ROW&_L
+    RRC A
+    MOV ROW&_L, A
+    MOV A, ROW&_M
+    RRC A
+    MOV ROW&_M, A
+    MOV A, ROW&_R
+    RRC A
+    MOV ROW&_R, A
 ENDM
 
 PFUN_SHIFT_PIECE_LEFT:

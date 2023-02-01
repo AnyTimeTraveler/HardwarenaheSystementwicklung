@@ -2,7 +2,8 @@ NAME screen
 
 SEG_REFRESH_SCREEN SEGMENT CODE
 
-EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW, SCREEN_START)
+EXTRN DATA (SCREEN_REFRESH_CURRENT_ROW)
+EXTRN IDATA (GAMESCREEN)
 EXTRN XDATA (LED_MATRIX_0, LED_MATRIX_1, LED_MATRIX_2)
 EXTRN CODE (PFUN_SERIAL_WRITE)
 EXTRN BIT (OUT_SCREEN)
@@ -32,7 +33,7 @@ RETURN:
     RETI
 
 DRAW_SEGMENT_COLOR MACRO OFFSET
-    MOV R1, #GAMESCREEN_0 + OFFSET
+    MOV R1, #GAMESCREEN + OFFSET
     MOV R0, #GAMESCREEN_1 + OFFSET
     CALL FUN_REFRESH_MODULE_COLOR
 ENDM
@@ -62,11 +63,13 @@ LOAD_LINE MACRO
     INC R0
 ENDM
 
+BYTES_BETWEEN_ROWS EQU 7*3
+
 ; Send a new batch of data to each segment
 ; PARAM R7 Current line (preserved)
 FUN_REFRESH_SCREEN_ROW:
     ; load first line of the screen
-    MOV A, SCREEN_START
+    MOV A, #GAMESCREEN
     ; add the current line 3 times, since each line is 3 bytes long
     ADD A, R7
     ADD A, R7
@@ -76,300 +79,217 @@ FUN_REFRESH_SCREEN_ROW:
 
     MOV DPTR, #LED_MATRIX_0
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     MOV A, R0
-    ADD A, #5
+    ADD A, #BYTES_BETWEEN_ROWS
     MOV R0, A
+
     REPT 9
         INC DPTR
     ENDM
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     MOV A, R0
-    ADD A, #5
+    ADD A, #BYTES_BETWEEN_ROWS
     MOV R0, A
 
 
     MOV DPTR, #LED_MATRIX_1
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     MOV A, R0
-    ADD A, #5
+    ADD A, #BYTES_BETWEEN_ROWS
     MOV R0, A
     REPT 9
         INC DPTR
     ENDM
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     MOV A, R0
-    ADD A, #5
+    ADD A, #BYTES_BETWEEN_ROWS
     MOV R0, A
 
 
 
     MOV DPTR, #LED_MATRIX_2
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     MOV A, R0
-    ADD A, #5
+    ADD A, #BYTES_BETWEEN_ROWS
     MOV R0, A
     REPT 9
         INC DPTR
     ENDM
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
     LOAD_LINE
-    DRAW_BIT B.0
-    DRAW_BIT B.1
-    DRAW_BIT B.2
-    DRAW_BIT B.3
-    DRAW_BIT B.4
-    DRAW_BIT B.5
-    DRAW_BIT B.6
     DRAW_BIT B.7
+    DRAW_BIT B.6
+    DRAW_BIT B.5
+    DRAW_BIT B.4
+    DRAW_BIT B.3
+    DRAW_BIT B.2
+    DRAW_BIT B.1
+    DRAW_BIT B.0
     ENABLE_LINE
-
-
-
-    ; DRAW_SEGMENT 1,0
-    ; DRAW_SEGMENT 1,16
-    ; DRAW_SEGMENT 1,32
-    ; DRAW_SEGMENT 1,48
-    ; DRAW_SEGMENT 1,1
-    ; DRAW_SEGMENT 1,17
-    ; DRAW_SEGMENT 1,33
-    ; DRAW_SEGMENT 1,49
-    ; MOV DPTR, #LED_MATRIX_2
-    ; DRAW_SEGMENT 2,0
-    ; DRAW_SEGMENT 2,16
-    ; DRAW_SEGMENT 2,32
-    ; DRAW_SEGMENT 2,48
-    ; DRAW_SEGMENT 2,1
-    ; DRAW_SEGMENT 2,17
-    ; DRAW_SEGMENT 2,33
-    ; DRAW_SEGMENT 2,49
-    RET
-
-; RARAM R1 Gamescreen
-; PARAM R6 Row-Bitmask
-; PARAM R7 Current line (preserved)
-FUN_REFRESH_MODULE:
-    MOV R5, #8
-    MOV A, @R1
-RF_LOOP:
-    ; check if there is a pixel
-    MOV A, @R1
-    ANL A, R6
-    JZ PIXEL_OFF
-PIXEL_ON:
-    MOV A, #0xFF
-    JMP RF_WRITE
-PIXEL_OFF:
-    MOV A, #0x00
-RF_WRITE:
-    MOVX @DPTR, A
-    INC R1
-    INC R1
-    INC DPTR
-    DJNZ R5, RF_LOOP
-    MOV A, R7
-    ORL A, #0x08
-    MOVX @DPTR, A
-    INC DPTR
-    RET
-
-; RARAM R1 Gamescreen
-; PARAM R6 Row-Bitmask
-; PARAM R7 Current line (preserved)
-FUN_REFRESH_MODULE_COLOR:
-    MOV R5, #8
-RFC_LOOP:
-    ; check if there is a pixel
-    MOV A, @R1
-    ANL A, R6
-    JZ RFC_PIXEL_OFF
-RFC_PIXEL_ON:
-    MOV A, @R0
-    ANL A, R6
-    JZ RFC_GREEN
-RFC_RED:
-    MOV A, #0x0F
-    JMP RFC_WRITE
-RFC_GREEN:
-    MOV A, #0xF0
-    JMP RFC_WRITE
-RFC_PIXEL_OFF:
-    MOV A, #0x00
-RFC_WRITE:
-    MOVX @DPTR, A
-    INC R1
-    INC R1
-    INC R0
-    INC R0
-    INC DPTR
-    DJNZ R5, RFC_LOOP
-    MOV A, R7
-    ORL A, #0x08
-    MOVX @DPTR, A
-    INC DPTR
     RET
 
 END
