@@ -2,11 +2,11 @@
 
 set -e
 
-# KEIL_PATH="../../Programme/Keil/C51/BIN"
-KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
+KEIL_PATH="../../Programme/Keil/C51/BIN"
+# KEIL_PATH="$HOME/.wine/drive_c/Keil_v5/C51/BIN"
 MAIN="init"
 OUPTUT_PATH="./out/"
-SRC_FILES="allocations_idata allocations_xdata allocations_rom keyboard interrupts detect_baudrate game_screen game_current_piece game_logic screen debug"
+SRC_FILES="allocations_idata allocations_xdata allocations_rom keyboard interrupts gametick_interrupt detect_baudrate game_screen game_current_piece game_logic screen debug"
 
 function compile_file {
     file="$1"

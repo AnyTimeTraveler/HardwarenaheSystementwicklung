@@ -5,9 +5,18 @@ NAME allocations_idata
 ; == DATA RAM ==
 ; ==============
 
+SEG_STACK SEGMENT DATA
+
+PUBLIC STACK
+
+RSEG SEG_STACK
+STACK:                      DS 0x10
+
+SEG_BITS SEGMENT BIT
+
 PUBLIC BIT_KEYBOARD_BREAK, BIT_CURRENT_COLOR, BIT_RUN_GAMETICK
 
-BSEG AT 0x20
+RSEG SEG_BITS
 BIT_KEYBOARD_BREAK:         DBIT 1
 BIT_CURRENT_COLOR:          DBIT 1
 BIT_RUN_GAMETICK:           DBIT 1
@@ -22,7 +31,7 @@ PUBLIC CURRENT_PIECE_H_POS, SCREEN_REFRESH_CURRENT_ROW, GAMESTATE, SCREENMODE, C
 PUBLIC SCREEN_START, SCREEN_LEN, SCREEN_COLOUR
 
 RSEG SEG_VARIABLES
-CURRENT_PIECE_DECOMPRESSED: DS 8
+CURRENT_PIECE_DECOMPRESSED: DS 12
 GAMETICK_SUB_COUNTER:       DS 1
 CURRENT_LEVEL:              DS 1
 CURRENT_PIECE_INDEX:        DS 1
@@ -30,6 +39,9 @@ CURRENT_PIECE_ROT_INDEX:    DS 1
 CURRENT_PIECE_V_POS:        DS 1
 CURRENT_PIECE_H_POS:        DS 1
 SCREEN_REFRESH_CURRENT_ROW: DS 1
+
+SEG_GAMESTATE SEGMENT DATA
+RSEG SEG_GAMESTATE
 GAMESTATE:                  DS 1
 SCREENMODE:                 DS 1
 CLEARING_ROW:               DS 1
@@ -39,14 +51,21 @@ SCREEN_COLOUR:              DS 1
 
 CP                          DATA CURRENT_PIECE_DECOMPRESSED
 CP_R0_L                     DATA CP + 0
-CP_R0_R                     DATA CP + 1
-CP_R1_L                     DATA CP + 2
-CP_R1_R                     DATA CP + 3
-CP_R2_L                     DATA CP + 4
-CP_R2_R                     DATA CP + 5
-CP_R3_L                     DATA CP + 6
-CP_R3_R                     DATA CP + 7
-CURRENT_PIECE_LENGTH        EQU  0x08
+CP_R0_M                     DATA CP + 1
+CP_R0_R                     DATA CP + 2
+
+CP_R1_L                     DATA CP + 3
+CP_R1_M                     DATA CP + 4
+CP_R1_R                     DATA CP + 5
+
+CP_R2_L                     DATA CP + 6
+CP_R2_M                     DATA CP + 7
+CP_R2_R                     DATA CP + 8
+
+CP_R3_L                     DATA CP + 9
+CP_R3_M                     DATA CP + 10
+CP_R3_R                     DATA CP + 11
+CURRENT_PIECE_LENGTH        EQU  12
 
 
 ; ===============

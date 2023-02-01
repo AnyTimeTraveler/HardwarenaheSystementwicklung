@@ -2,8 +2,10 @@ NAME init
 
 SEG_INIT SEGMENT CODE
 
-EXTRN DATA (GAMESTATE, SCREEN_REFRESH_CURRENT_ROW, SCREEN_START, T2CON)
-EXTRN CODE (GS_FIRST_RUN, PFUN_FILL_SCREEN, PFUN_DETECT_BAUDRATE)
+EXTRN DATA (GAMESTATE, SCREEN_REFRESH_CURRENT_ROW, SCREEN_START, SCREEN_LEN, T2CON, STACK)
+EXTRN CODE (GS_FIRST_RUN, PFUN_FILL_SCREEN, PFUN_DETECT_BAUDRATE, PJMP_GAMELOOP)
+EXTRN IDATA (GAMESCREEN_0)
+EXTRN NUMBER (GAMESCREEN_LEN)
 PUBLIC PJMP_INIT
 
 RSEG SEG_INIT
@@ -12,8 +14,13 @@ PJMP_INIT:
     CLR RS0
     CLR RS1
 
-    MOV GAMESTATE, #GS_FIRST_RUN
+    ; move stack to the indirect addressed area, so the other register banks are free
+    ; normally, the stack starts at 0x07, which is the start of the second register bank
+    MOV SP, #STACK
 
+    MOV GAMESTATE, #GS_FIRST_RUN
+    MOV SCREEN_START, #GAMESCREEN_0
+    MOV SCREEN_LEN, #0xC0
     MOV SCREEN_REFRESH_CURRENT_ROW, #0
 
     CALL FUN_SETUP_TIMERS
@@ -27,21 +34,19 @@ PJMP_INIT:
     MOV R0, SCREEN_START
 ; PARAM A byte to fill screen with
     MOV A, #0xAA
-    MOV A, #0xAA
-    CALL PFUN_FILL_SCREEN
-    CALL PFUN_DETECT_BAUDRATE
+    ; CALL PFUN_FILL_SCREEN
+    ; CALL PFUN_DETECT_BAUDRATE
     CALL FUN_SETUP_SERIAL
+
+    SETB ET1
+    SETB TR1
 
 ; PARAM R0 screen to fill
     MOV R0, SCREEN_START
 ; PARAM A byte to fill screen with
     MOV A, #0x00
     CALL PFUN_FILL_SCREEN
-
-LOOP_MAIN:
-    JMP LOOP_MAIN
-
-
+    JMP PJMP_GAMELOOP
 
 
 FUN_SETUP_TIMERS:
@@ -81,7 +86,7 @@ FUN_SETUP_TIMERS:
     ; Timer 0 Run (Gamescreen) aktivieren
     SETB TR0
     ; Timer 1 Run (Gametick) aktivieren
-    SETB TR1
+    CLR TR1
 
     RET
 
@@ -124,7 +129,7 @@ FUN_SETUP_SERIAL:
 
 FUN_SET_INTERRUPT_PRIORITIES:
     ; give screen (timer 0) high priority
-    SETB PT0
+    CLR PT0
     ; give keyboard (serial) low priority
     CLR PS
     ; give gameticks (timer 1) low priority

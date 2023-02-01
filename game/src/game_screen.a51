@@ -30,6 +30,7 @@ PFUN_ADD_PIECE:
     RET
 
 PFUN_ADD_PIECE_COLOR:
+    RET
     ; move to current piece location
     MOV A, SCREEN_COLOUR
     ADD A, CURRENT_PIECE_V_POS
@@ -181,6 +182,7 @@ MOVE_DOWN:
 
 ; PARAM R1 Row to fill first
 PFUN_MOVE_ROWS_DOWN_COLOR:
+    RET
     ; move R0 to the row above
     MOV A, R1
     ADD A, SCREEN_LEN
