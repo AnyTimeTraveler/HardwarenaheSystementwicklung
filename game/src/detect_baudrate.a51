@@ -114,10 +114,10 @@ VALID_MEASUREMENT:
     CLR C
     SUBB A, B
 
-    CALL PFUN_SERIAL_WRITE
+    ;CALL PFUN_SERIAL_WRITE
     ; TODO: remove multiple writes, when confirmed that ACC isn't being changed
-    CALL PFUN_SERIAL_WRITE
-    CALL PFUN_SERIAL_WRITE
+    ;CALL PFUN_SERIAL_WRITE
+    ;CALL PFUN_SERIAL_WRITE
 
     ; write auto-reload
     MOV RCAP2H, #0xFF

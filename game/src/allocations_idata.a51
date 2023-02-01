@@ -23,15 +23,47 @@ BIT_RUN_GAMETICK:           DBIT 1
 BIT_MULTI_SCREEN_MODE:      DBIT 1
 
 
-SEG_VARIABLES SEGMENT DATA
+SEG_CURRENT_PIECE_DATA SEGMENT DATA
 
 PUBLIC CURRENT_PIECE_DECOMPRESSED, CP
-PUBLIC CP_R0_L, CP_R0_M, CP_R0_R, CP_R1_L, CP_R1_M, CP_R1_R, CP_R2_L, CP_R2_M, CP_R2_R, CP_R3_L, CP_R3_M, CP_R3_R
+PUBLIC CP_R0_L, CP_R0_ML, CP_R0_MR, CP_R0_R
+PUBLIC CP_R1_L, CP_R1_ML, CP_R1_MR, CP_R1_R
+PUBLIC CP_R2_L, CP_R2_ML, CP_R2_MR, CP_R2_R
+PUBLIC CP_R3_L, CP_R3_ML, CP_R3_MR, CP_R3_R
+
+RSEG SEG_CURRENT_PIECE_DATA
+CURRENT_PIECE_DECOMPRESSED: DS 16
+
+CP                          DATA CURRENT_PIECE_DECOMPRESSED
+CP_R0_L                     DATA CP + 0
+CP_R0_ML                    DATA CP + 1
+CP_R0_MR                    DATA CP + 2
+CP_R0_R                     DATA CP + 3
+
+CP_R1_L                     DATA CP + 4
+CP_R1_ML                    DATA CP + 5
+CP_R1_MR                    DATA CP + 6
+CP_R1_R                     DATA CP + 7
+
+CP_R2_L                     DATA CP + 8
+CP_R2_ML                    DATA CP + 9
+CP_R2_MR                    DATA CP + 10
+CP_R2_R                     DATA CP + 11
+
+CP_R3_L                     DATA CP + 12
+CP_R3_ML                    DATA CP + 13
+CP_R3_MR                    DATA CP + 14
+CP_R3_R                     DATA CP + 15
+
+CURRENT_PIECE_LENGTH        EQU  16
+
+
+SEG_VARIABLES SEGMENT DATA
+
 PUBLIC GAMETICK_SUB_COUNTER, CURRENT_LEVEL, CURRENT_PIECE_INDEX, CURRENT_PIECE_ROT_INDEX, CURRENT_PIECE_V_POS
 PUBLIC CURRENT_PIECE_H_POS, SCREEN_REFRESH_CURRENT_ROW, GAMESTATE, SCREENMODE, CLEARING_ROW
 
 RSEG SEG_VARIABLES
-CURRENT_PIECE_DECOMPRESSED: DS 12
 GAMETICK_SUB_COUNTER:       DS 1
 CURRENT_LEVEL:              DS 1
 CURRENT_PIECE_INDEX:        DS 1
@@ -39,30 +71,10 @@ CURRENT_PIECE_ROT_INDEX:    DS 1
 CURRENT_PIECE_V_POS:        DS 1
 CURRENT_PIECE_H_POS:        DS 1
 SCREEN_REFRESH_CURRENT_ROW: DS 1
-
-SEG_GAMESTATE SEGMENT DATA
-RSEG SEG_GAMESTATE
 GAMESTATE:                  DS 1
 SCREENMODE:                 DS 1
 CLEARING_ROW:               DS 1
-
-CP                          DATA CURRENT_PIECE_DECOMPRESSED
-CP_R0_L                     DATA CP + 0
-CP_R0_M                     DATA CP + 1
-CP_R0_R                     DATA CP + 2
-
-CP_R1_L                     DATA CP + 3
-CP_R1_M                     DATA CP + 4
-CP_R1_R                     DATA CP + 5
-
-CP_R2_L                     DATA CP + 6
-CP_R2_M                     DATA CP + 7
-CP_R2_R                     DATA CP + 8
-
-CP_R3_L                     DATA CP + 9
-CP_R3_M                     DATA CP + 10
-CP_R3_R                     DATA CP + 11
-CURRENT_PIECE_LENGTH        EQU  12
+ANIMATION_INDEX:            DS 1
 
 
 ; ===============
@@ -92,11 +104,11 @@ OUT_LED                     BIT P3.5
 
 PUBLIC GAMESCREEN, GAMESCREEN_LEN, GAMESCREEN_ROWS, GAMESCREEN_ROW_LEN
 
-GAMESCREEN_LEN            EQU 0x90
+GAMESCREEN_LEN            EQU 0xC0
 GAMESCREEN_ROWS           EQU 0x30
-GAMESCREEN_ROW_LEN        EQU 0x03
+GAMESCREEN_ROW_LEN        EQU 0x04
 
 ISEG AT 0x40
-GAMESCREEN:               DS 0x90
+GAMESCREEN:               DS 0xC0
 
 END

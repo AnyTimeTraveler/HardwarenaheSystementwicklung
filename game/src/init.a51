@@ -10,11 +10,12 @@ PUBLIC PJMP_INIT
 
 RSEG SEG_INIT
 PJMP_INIT:
-    ; user registerbank 0 for the whole program
+    ; use registerbank 0 for the background program
+    ; use registerbank 1 for interrupts
     CLR RS0
     CLR RS1
 
-    ; move stack to the indirect addressed area, so the other register banks are free
+    ; move stack to it's allocated space
     ; normally, the stack starts at 0x07, which is the start of the second register bank
     MOV SP, #STACK
 
@@ -51,7 +52,7 @@ FUN_SETUP_TIMERS:
     ; Mode 11: 2x 8 Bit Timer (separat)
     ; 
     MOV TMOD, #0001$0001b
-    
+
 
     ; TIMER COUNTER 2 CONTROL MODE BITS
     ; TF2 | EXF2 | RCLK | TCLK | EXEN2 | TR2 | CT2 | CPRL2
@@ -119,7 +120,7 @@ FUN_SETUP_SERIAL:
     RET
 
 FUN_SET_INTERRUPT_PRIORITIES:
-    ; give screen (timer 0) high priority
+    ; give screen (timer 0) low priority
     CLR PT0
     ; give keyboard (serial) low priority
     CLR PS
